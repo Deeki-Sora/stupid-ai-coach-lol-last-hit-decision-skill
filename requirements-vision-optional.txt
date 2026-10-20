@@ -1,0 +1,13 @@
+# Optional local visual proposal packages; none is required by the workbench.
+# Check THIRD_PARTY_NOTICES.md before installing or redistributing a backend.
+# Ultralytics is intentionally not installed by default because its default
+# code and trained models are AGPL-3.0.
+opencv-python
+paddleocr
+paddlepaddle
+# Used by the trained YOLO11n detectors and BoT-SORT fallback described in
+# workbench/auto_annotation.py. Review AGPL/Enterprise terms before shipping.
+ultralytics==8.4.182
+lap>=0.5.12
+# Install PaddleDetection/MMDetection/RT-DETR separately from upstream when
+# a detector trained for this game's UI is available.

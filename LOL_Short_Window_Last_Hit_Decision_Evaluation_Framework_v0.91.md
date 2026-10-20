@@ -894,6 +894,8 @@ For each summoner spell record name or ID, availability, remaining cooldown, cha
 \qquad C_{SS,p}=\operatorname{mean}_s\left(c_{p,s}^{unavailable}-b_{p,s}^{observed}\right).
 \]
 
+For a shared 100-point spell state, an unused ready slot contributes one point and a used slot contributes zero unless both corresponding spells expose remaining cooldown. When both are on cooldown, allocate the slot by inverse remaining time: 40 seconds versus 60 seconds gives 60:40. Ordinary champion abilities are not a separate score; their cooldowns remain inside the current state and affect the legal-action and pressure components.
+
 The candidate-action relative resource/state utility is
 
 \[
@@ -1148,18 +1150,7 @@ First assess recognition and execution of the level window's resource-conversion
 
 \(K_h\) evaluates identifying favorable windows, using opposing resource commitments, preserving key abilities and converting trades into XP, gold or wave control. A single last-hit result is not its criterion.
 
-\[
-K_h=0.25K_{window}+0.20K_{resource\ plan}+0.15K_{cooldown\ discipline}
-+0.15K_{cost\ conversion}+0.10K_{passive}+0.05K_{rune}
-+0.10K_{adaptation}.
-\]
-
-\[
-S_h^{two\text{-}layer}=\omega K_h+(1-\omega)O_h,
-\qquad \omega=0.50.
-\]
-
-The public framework freezes the strategy/execution mix at 50:50. The weight is part of the model specification, not a conversational adjustment; confidence and coverage are reported separately and do not change this mix.
+The detailed window, resource-plan, cooldown, cost-conversion, passive, rune and adaptation indicators are retained as evidence for the component scores in Section 51.4. They must not be combined a second time after \(K_h\) has been computed there.
 
 \(O_h\) evaluates distance, phase, movement, attack cycles, resource costs and risk. Use small execution mistakes to distinguish players only after the strategy reaches a predefined threshold. Precise execution of a wrong strategy should not earn a high score.
 
@@ -1202,7 +1193,200 @@ S_h^{final}=C_h\left[\omega K_h+(1-\omega)O_h^{+}\right],
 
 Preserve the four scoring categories. Passive/rune effects enter resource efficiency through \(E_{res}^{+}\) and opposing pressure through \(P^{+}\), not as a second duplicate reward.
 
+## 51.4 Single-window component scores
+
+A single replay is useful without a multi-match sample. Report the components before the composite score. Let (N_h^{CS,*}(T)) be the theoretically available last-hit opportunities for side (h) by the declared endpoint, based on confirmed minion deaths and a declared level/XP checkpoint. Then
+
+\[
+S_{CS,h}=100\min\left(1,\frac{N_h^{CS}(T)}{N_h^{CS,*}(T)}\right),
+\qquad
+S_{XP,h}=100\min\left(1,\frac{X_h(T)-X_h(t_0)}{X_h^*(T)-X_h(t_0)}\right).
+\]
+
+At a level-three checkpoint, (N^{CS,*}=13) only when the confirmed wave/death sequence makes thirteen last-hit opportunities available. A level label alone does not establish that upper bound. Before a level checkpoint, use the confirmed experience and minion-death timeline rather than a fixed CS number.
+
+For eligible free windows, define pressure as the opponent cost actually caused by attacks or abilities that do not sacrifice the declared target resource:
+
+\[
+S_{pressure,h}=100\min\left(1,\frac{P_h^{observed}}{P_h^{feasible\ max}}\right),
+\qquad
+P_h=\sum_j w_j(\Delta H_{opponent,j}+\Delta R_{opponent,j}+\Delta CD_{opponent,j}+\Delta G_{opponent,j}).
+\]
+
+This component has a 40% share of the strategy layer, the largest single strategy component. It rewards converting last-hit gaps into opponent cost, while preserving the target minion's timing. A player who only farms can score well on (S_{CS}) but cannot receive a high pressure score; a player who trades health and misses the available CS cannot receive a high (S_{CS}).
+
+For each shared state dimension (q), compute effective usable reserve before allocating the shared 100 points. Let (x_{h,q}) be current value, (M_{h,q}) the side-specific maximum, (f_{h,q}) an unusable safety floor, (r_{h,q}(T)) the recoverable amount before the endpoint, (w_q) the declared state weight, and (gamma_q>0) its curvature:
+
+\[
+u_{h,q}=w_q\left[\operatorname{clip}\left(\frac{x_{h,q}-f_{h,q}+r_{h,q}(T)}{M_{h,q}-f_{h,q}},0,1\right)\right]^{\gamma_q}.
+\]
+
+Then allocate the shared 100 points:
+
+\[
+S_{state,A,q}=100\frac{u_{A,q}}{u_{A,q}+u_{B,q}},
+\qquad S_{state,B,q}=100-S_{state,A,q}.
+\]
+
+The earlier linear split (60:40) is recovered when both sides have the same maximum and floor, no recovery is credited, (w_q=1), and (gamma_q=1). Use remaining health, mana/energy, available cooldown fraction, summoner-spell availability and consumable inventory only when both sides are observed or derivable/bounded by declared ranges. Missing values remain missing and the component is reweighted over observed dimensions.
+
+If a patch/tier/level-specific matchup prior (m_A(L)) is available, use it only as a difficulty adjustment:
+
+\[
+S_{match,A}=\operatorname{clip}\left(50+100(r_A-m_A(L)),0,100\right),
+\qquad S_{match,B}=100-S_{match,A},
+\]
+
+where (r_A) is the observed relative resource/state share. Aggregate OP.GG matchup win rate is not a level-two or level-three prior; it may be reported as a broad prior with low confidence. Exact level data must declare patch, tier, sample size and source.
+
+For a declared blue/red prior, preserve the published ratio as a separate reference component:
+
+\[
+m_B(L)=1-m_A(L),
+\qquad S_{prior,A}=100m_A(L),
+\qquad S_{prior,B}=100m_B(L).
+\]
+
+To reward performance under a disadvantage without changing the receipt or state accounts, use one bounded, zero-sum difficulty correction:
+
+\[
+B_A=\eta\left(50-S_{prior,A}\right),
+\qquad B_B=-B_A,
+\qquad
+S_{match,h}^{adj}=\operatorname{clip}\left(S_{match,h}+B_h,0,100\right),
+\quad 0\le\eta\le1.
+\]
+
+Thus a 47:53 prior reports 47 and 53 exactly; at \(\eta=1\), the disadvantaged blue side receives a three-point correction and red receives minus three points. The prior is used once, as a difficulty reference, and is never added to CS, gold, XP, health, resource or cooldown receipts.
+
+The strategy component is reported as
+
+\[
+K_h=0.30S_{CS,h}+0.15S_{XP,h}+0.40S_{pressure,h}+0.10S_{state,h}+0.05S_{match,h},
+\qquad
+S_h=0.50K_h+0.50O_h.
+\]
+
+Thus a single replay produces (S_{CS}), (S_{XP}), (S_{pressure}), (S_{state}), (S_{match}), (K), (O), and (S). Multi-match samples calibrate priors and uncertainty; they are not required to identify the concrete mistakes in one replay.
+
+## 51.5 Conditional distance and range evaluation
+
+The earlier close/far descriptions are examples of conditions, not fixed rewards. Distance is evaluated jointly with the event window. For actor (A), define opponent spell availability, threat exposure and minion-attack commitment as:
+
+If a cast time is known, readiness is derived before it is classified as unknown. Let (C_k) be the version-pinned base cooldown, (mu_k) the product of declared generic modifiers, (H_k) effective ability haste and (t_k^{last}) the last cast time:
+
+\[
+\widehat C_k=C_k\mu_k\frac{100}{100+H_k},
+\qquad
+\widehat r_k(t)=\max\left(0,\widehat C_k-(t-t_k^{last})\right),
+\qquad
+c_k^{commit}(t)=\mathbf 1[\text{the action is committed}],
+\qquad
+i_k(t)=\mathbf 1[\text{the committed action is interruptible}],
+\qquad
+a_k^{eff}(t)=\mathbf 1[\widehat r_k(t)=0\land(\neg c_k^{commit}(t)\lor i_k(t))].
+\]
+
+The provenance is ordered: direct frame observation, deterministic derivation from the pinned version data and event log, bounded interval, then irreducible unknown. A charge system, hidden cast time or unverified champion-specific exception must be supplied as an explicit event input; it is not silently inferred from a generic cooldown.
+
+\[
+a_{B,k}(t)=\mathbf 1[CD_{B,k}(t)=0\land(\neg c_{B,k}^{commit}(t)\lor i_{B,k}(t))\land R_{B,k}\text{ is verified}],
+\]
+\[
+z_{A\leftarrow B,k}(t)=\mathbf 1[d_{AB}(t)\le R_{B,k}\land a_{B,k}(t)=1],
+\qquad
+c_A(t)=\mathbf 1[A\text{ is attacking a target minion}].
+\]
+
+Here (d_{AB}) is measured from health-bar centres in pixels or game units and (R_{B,k}) is the verified effective damage range. Let the signed range margin and edge tolerance be:
+
+\[
+m_{A\leftarrow B,k}(t)=d_{AB}(t)-R_{B,k},
+\qquad
+L_{spell\text{-}edge,k}(t)=2\operatorname{clip}\left(1-\frac{|m_{A\leftarrow B,k}(t)|}{\delta_k},0,1\right)-1.
+\]
+
+A non-targeted hit outcome is (y_{B,k}\in\{0,1,?\}), where (?) means that the frame evidence is insufficient. The four layers are:
+
+\[
+L_{AA}=\mathbf 1[c_B=1\land d_{AB}\le R_B^{AA}]-\mathbf 1[c_B=0\land d_{AB}\le R_B^{AA}],
+\]
+
+\[
+L_{AA\text{-}edge}=\begin{cases}
+2\operatorname{clip}\left(1-\frac{d_{AB}-R_B^{AA}}{\delta_{AA}},0,1\right)-1,&c_B=0\land d_{AB}\ge R_B^{AA},\\
+0,&\text{otherwise or evidence is unknown}.
+\end{cases}
+\]
+
+\[
+L_{spell}=\begin{cases}
+1,&c_A=1\land m_{A\leftarrow B,k}\ge0,\\
+1,&c_A=1\land m_{A\leftarrow B,k}<0\land y_{B,k}=0,\\
+-1,&c_A=1\land m_{A\leftarrow B,k}<0\land y_{B,k}=1,\\
+1,&c_A=0\land a_{A,k}=1\land d_{AB}\le R_{A,k}\land y_{A,k}=1,\\
+0,&c_A=0\land a_{A,k}=1\land d_{AB}\le R_{A,k}\land y_{A,k}=?,\\
+-1,&c_A=0\land a_{B,k}=1\land d_{AB}\le R_{B,k}\land y_{B,k}=1,\\
+0,&\text{otherwise or evidence is unknown}.
+\end{cases}
+\]
+
+The continuous edge terms are used only when their distances and ranges are verified. For known layers (J\subseteq\{AA,AA\text{-}edge,spell,spell\text{-}edge\}), combine them with declared weights (\alpha_j):
+
+\[
+D_A=50+50\operatorname{clip}\left(\frac{\sum_{j\in J}\alpha_jL_j}{\sum_{j\in J}\alpha_j},-1,1\right).
+\]
+
+The first layer is auto-attack legality, the second is auto-attack edge quality, the third is spell threat/counterplay, and the fourth grades spell-edge distance. A known unavailable action, a controlled unit or a committed non-interruptible action has effective threat range zero before any distance relation is evaluated. Thus an opponent's committed last-hit action creates a temporary pressure window, while our own unavailable attack or spell creates a legal opportunity for the opponent to pressure us. The default implementation uses ((\alpha_{AA},\alpha_{AA\text{-}edge},\alpha_{spell},\alpha_{spell\text{-}edge})=(0.3,0.2,0.3,0.2)). A position just outside a ready spell's range therefore scores above a position far outside it, while both remain in the first qualitative "outside" class. The signed terms are predicate evidence, not raw distance rewards:
+
+* If (a_{B,k}=0), entering close range is not penalized by itself; if (d_{AB}\le R_{A,k}), A receives counter-threat evidence.
+* If (c_A=1) and (z_{A\leftarrow B,k}=0), the last hit is outside the ready spell's threat range. If (z=1), use (y_{B,k}): a miss favors A, a hit favors B, and unknown yields no directional reward.
+* If (c_A=0), compare both sides' ready damage ranges: exposing B to A's verified range is positive evidence, while exposing A to B's verified range is negative evidence.
+* For auto-attacks, entering B's attack range is legal only when (c_B=1), meaning B is committed to a minion last hit; otherwise it is an avoidable exposure. Swap A and B and evaluate the same predicates for B.
+
+Missing range, cooldown, hit or action-commitment evidence remains unknown rather than being treated as safe or as a mistake. This also covers censored frames and skills whose geometry cannot be inferred reliably from the recording.
+
+Attack speed, movement speed, windup and recovery delay change the overlap of the two action windows and therefore the feasible-action set or branch probabilities. They are not direct legality penalties. The actual exchange cost is evaluated at the common endpoint through gold/XP receipts and relative health, resource, cooldown and summoner-state utilities; a legal entry can still be a poor decision if its endpoint payoff is worse.
+
+The distance component must report its reason and measurable gap: pixel/game-unit distance, movement beyond the benchmark, attack-phase delay, range relation and hit status. It feeds (O_h) and the pressure explanation; it is not a standalone maximum-distance reward. A recommendation is emitted only when both the observed value and the benchmark are supported.
+
+## 51.6 Conditional layered evaluation interface
+
+Every candidate action is evaluated in the same order: hard feasibility, conditional quality layers and common-endpoint payoff. Let (E(a\mid\Omega_t)) be the hard feasibility gate and (J(a)) the set of observed quality layers:
+
+\[
+E(a\mid\Omega_t)=\mathbf 1\{\text{version, range, cooldown, control, resource, occupation and deadline constraints hold}\},
+\]
+\[
+Q(a)=E(a\mid\Omega_t)\frac{\sum_{j\in J(a)}w_jq_j(a)}{\sum_{j\in J(a)}w_j},
+\qquad q_j(a)\in[-1,1].
+\]
+
+An ineligible action returns (E=0), its violation reasons and its observed endpoint evidence; it does not receive a legal-action quality score. Missing quality layers are removed from the denominator and reported through coverage. An unknown layer is not a failure and is not silently replaced with zero.
+
+The reusable layer families are:
+
+| Evaluation object | Hard gate | Quality layers |
+|---|---|---|
+| Last-hit window | arrival interval inside the executable window | timing slack, phase slack, receipt conversion |
+| Joint schedule | every target feasible and occupation intervals non-overlapping | minimum slack, joint receipt conversion, endpoint state |
+| Free-window pressure | positive insertable time and preserved target death timing | opponent cost, own cost, endpoint relative state |
+| Target screening | legal target and valid action route | last-hit probability, next-window value, deadline margin, attack cost |
+| Preparatory damage | safety boundary and next window preserved | survive/death branch value, graph change, endpoint state |
+| Waiting/information | waiting legal and information value exceeds deadline cost | information value, deadline cost, endpoint value |
+| Branch search | branch mechanics and probabilities declared | expected endpoint value, lower-tail value, VOI and execution cost |
+
+Endpoint receipts and state vectors are settled once at the shared endpoint. A sub-layer must not add the same gold, XP, health, resource or cooldown term again after it has entered the endpoint vector. The published player report keeps strategy and execution at 50:50:
+
+\[
+S_h=0.50K_h+0.50O_h.
+\]
+
+Risk changes branch selection through expected value and tail loss; it is not a direct behavioral-quality penalty. Attack speed, movement speed, windup and recovery alter feasibility and branch probabilities, while actual exchange cost is determined by the endpoint return/cost vector.
+
 # 52. Output Format
+
+The player-facing result is not only a score. For each missed or suboptimal window, output the observed value, the feasible benchmark, the measurable loss and one actionable correction: distance gap in pixels/game units, extra movement distance, attack-phase delay, lost theoretical CS, unused pressure opportunity and the state cost avoided or paid. A recommendation is emitted only when the benchmark and observation are both supported; otherwise report the missing measurement.
 
 At each decision node, output the task and shared endpoint; next target and collection method; commitment timing or trigger; cancellation conditions; pre-action candidate \(Q_t\) and margin over the next best; effect on the next last hit; insertable free time; both sides' gold/XP receipt efficiency and health/mana/cooldown spending; living unsettled resources; success probability or conditional range; and patch-dependent or uncertain inputs.
 

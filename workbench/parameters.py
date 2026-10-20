@@ -4,6 +4,7 @@ from .core import read_json
 from .catalog import catalog_path, champion_details
 from .native_data import native_data
 from .stat_arithmetic import STAT_FIELDS, subtotal
+from algorithms.risk_value import derive_cooldown_state
 
 
 def effective_parameters(directory,reference,source_time_s,fetch_native=False):
@@ -48,9 +49,22 @@ def effective_parameters(directory,reference,source_time_s,fetch_native=False):
         def choose(field,default=None):return dict(value=given[field],source='event_input') if given.get(field) is not None else dict(value=default,source='static_reference' if default is not None else 'unknown')
         reduction=stats['cooldown_reduction']['value'];cooldown=raw.get('cooldown')
         cd=cooldown*(1-reduction) if cooldown is not None and reduction is not None else None
+        remaining=choose('remaining_cooldown_s');cooldown_provenance=remaining['source']
+        if remaining['value'] is None and given.get('last_cast_time_s') is not None and cooldown is not None and stats['ability_haste']['value'] is not None:
+            try:
+                derived=derive_cooldown_state(event_time_s=source_time_s,
+                    last_cast_time_s=given['last_cast_time_s'],cooldown_s=cooldown,
+                    ability_haste=stats['ability_haste']['value'],
+                    cooldown_multiplier=given.get('cooldown_multiplier') if given.get('cooldown_multiplier') is not None else 1.,
+                    charges_remaining=given.get('charges_remaining'))
+                remaining=dict(value=derived['remaining_cooldown_s'],source=derived['provenance'])
+                cooldown_provenance=derived['provenance']
+            except ValueError as error:
+                lookup_notes.append('cooldown_derivation:'+str(error))
         skills[key]=dict(rank=skill.get('rank'),range=choose('range',raw.get('range')),resource_cost=choose('resource_cost',raw.get('cost')),
             base_cooldown_s=cooldown,standard_haste_cooldown_reference_s=cd,
-            remaining_cooldown_s=choose('remaining_cooldown_s'),damage=choose('damage'),damage_type=given.get('damage_type'),
+            remaining_cooldown_s=remaining,cooldown_provenance=cooldown_provenance,
+            last_cast_time_s=given.get('last_cast_time_s'),damage=choose('damage'),damage_type=given.get('damage_type'),
             per_target_cooldown_s=choose('per_target_cooldown_s'),cast_time_s=choose('cast_time_s'),missile_speed=choose('missile_speed'),
             event_inputs_are_current=fresh)
     notes.extend(['Conditional rune/passive/item effects use event inputs and effective-stat overrides; a counter does not imply an automatic stat bonus.',

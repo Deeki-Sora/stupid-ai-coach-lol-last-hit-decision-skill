@@ -1,0 +1,27 @@
+{
+  "weights": "hero_detector.pt",
+  "source_run": "hero_detector_fullres_v1-2",
+  "names": {
+    "0": "blue_hero",
+    "1": "red_hero"
+  },
+  "metrics": {
+    "metrics/precision(B)": 0.7676266786502735,
+    "metrics/recall(B)": 0.8678627868187556,
+    "metrics/mAP50(B)": 0.8880357142857143,
+    "metrics/mAP50-95(B)": 0.7500714285714286,
+    "fitness": 0.7500714285714286
+  },
+  "per_class_map50": [0.8960714285714284, 0.8800000000000001],
+  "per_class_map50_95": [0.719642857142857, 0.7805000000000002],
+  "training": {
+    "initial_weights": "vision/models/yolo11n/minion_bar_detector.pt",
+    "dataset": "vision/training/hero_detector/dataset.yaml",
+    "epochs_requested": 120,
+    "imgsz": 1920,
+    "batch": 1,
+    "optimizer": "AdamW",
+    "selection": "standard single-label validation and early stopping"
+  },
+  "training_results_file": "hero_training_results.csv"
+}

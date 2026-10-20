@@ -1,5 +1,31 @@
 # 工作台详细使用指南
 
+运行 `python main.py start` 后，首先在浏览器选择录像文件或文件夹。填写视频开始、结束时间，选择 0.1–0.5 秒采样间隔和保存目录，并决定是否勾选本地 YOLO 自动标注，再点击“生成截图并进入工作台”。程序通过 FFmpeg 保存独立截图，并在新的 `session_*/clip_01/` 下建立事件表和距离表，不覆盖录像。开始和结束时间是视频时间。默认地址为 `http://127.0.0.1:58392/`；端口不可用时依次尝试 58393 等端口，以终端实际显示的地址为准。
+
+已有标注可通过 `python main.py start --workspace <工作区>` 恢复。页面顶部“刷新当前帧”会保存当前填写内容并刷新距离、游戏内时间和状态摘要。拖框模式按住鼠标拖动时会显示虚线框，松开后取框中心。小兵距离对象优先直接勾选，无需手写编号；编号输入放在高级选项中。
+
+英雄配置页填写完整版本号后会自动读取数据，亦可点击“加载此版本目录”。双方符文、属性碎片、装备、技能等级默认折叠，点击分组标题展开；不自动猜测录像版本或替玩家选择符文。标注页同时显示像素距离及当前标尺下的近似游戏单位距离，未设标尺时只显示像素。
+
+英雄、符文页（含属性碎片）和召唤师技能的选择属于整段录像的固定配置。等级、技能加点、装备、生命值、资源、冷却、符文层数和临时状态属于各帧状态；编辑后自动保存并重算属性，显示帧编号、视频时间和已知游戏时间。切到没有记录的帧时，表单保留未知，不将上一帧状态当作当前观测。后台保留带时间来源的最近记录用于参考，不声称旧记录是当前实测。
+
+自动属性计算使用版本基础数据、等级成长、装备固定属性和属性碎片；不自动计入装备触发效果、符文触发效果和不确定的临时增益。必要时填写当前帧的人工覆盖值，并记录依据。召唤师技能名称不逐帧改变，剩余冷却、是否可用和是否已使用逐帧保存。
+
+不想手填时，可在“AI 辅助标注”中点击“请 Skill 识别当前帧”，再请正在运行的 Skill 对话处理工作台识别请求。网页按钮不会自行启动 AI 服务或唤醒对话。Skill 读取截图、写入待复核草稿后，工作台在无未保存编辑时自动载入；已有人工值保留，并提供备份。玩家检查后点击“确认当前帧识别结果”。普通颜色检测不会自动确定兵种、阵营或动作。
+
+标注页上方另有“请求 SKILL 协助填入当前帧”和“请求 SKILL 一次性填入所有帧”。全部帧任务按时间顺序分批处理，并记录已检查帧；未处理完时显示部分完成。Skill 结束后会在对话中说明已填内容、未知项和待复核项，玩家刷新工作台即可查看。游戏时间、单位名册和动作可以回填；距离由单位中心与标尺计算，不以 AI 猜测的距离代替缺失坐标。
+
+“评分与推演”页首先提供“运行分析任务”，下方显示双方分项评分、综合分、事件时间轴及建议，并可下载 MD 报告。评分配置或证据尚不完整时保留未知，生成 Skill 分析请求。有限事件和博弈工具在“高级：短时事件与博弈推演”中折叠显示，不是运行普通复盘分析的前置条件。
+
+自动对位胜率查询只使用公开全等级数据，无需填写等级，成功时显示并填入双方比例；手动填写区单独保留等级。公开来源无法提供所选版本的数据时，可手动填写，未知胜率按既有 50:50 默认规则处理，不把当前版本数据冒充旧版本数据。
+
+“自动查询英雄技巧与对线攻略”按钮生成 Skill 联网搜索请求，不再使用后台网页搜索抓取器。请在 Skill 对话中处理攻略请求，Skill 按页面语言整理正文与来源链接并回填工作区，之后自动载入或刷新查看。状态表的每项修改会独立自动保存：选项变更立即入队，连续文字输入使用约 150 毫秒防抖；手动记录按钮仅供备用，无需填完整张表。
+
+观察表、机制模板和统计结果分别自动保存在工作区 `mechanics/observations.csv`、`mechanics/adapters.json` 和 `mechanics/estimated_models.json`，不必下载或编写 JSON。可用“请 Skill 协助填写观察表”让 Skill 根据录像填写，再用“刷新工作区观察表”重新计算。没有可靠观察时保留空表和未知结果，不生成虚构的触发率。
+
+浏览器启动页的选择按钮会打开页内磁盘浏览窗口，可选择磁盘、进入文件夹或返回上一级，直接读取原录像路径。选中录像后，ffprobe 自动读取并显示总时长；开始时间必须早于片尾，结束时间不得超过片尾。保存目录默认跟随原录像所在文件夹，截图、表格和工作区统一保存在其新建的 `session_*/clip_01/` 内，也可另选保存目录。采样期间显示帧数、耗时和截图目录；失败时显示错误，不会持续显示正在生成。以下 `python main.py` 的交互命令行流程仍使用其显式输出目录规则。
+
+勾选“使用本地 YOLO 自动识别并追踪单位”后，启动页会先检查 CUDA、PyTorch、Ultralytics、BoT-SORT 所需的 `lap` 和 `vision/models/yolo11n/` 权重。全部可用时，采样后自动检测小兵本体与血条、写入完整血条中心并标记为待复核。未勾选或任一条件不可用时，程序自动运行 OpenCV/Pillow 基础 Track，并把候选框显示在标注页；由于该路径不能可靠确认兵种，身份保持未知，不会强行写入错误单位 ID。
+
 ## 1. 准备环境
 
 下载或克隆完整仓库，进入仓库根目录。需要 Python 3.11+ 和 FFmpeg/ffprobe，安装方法见 README。先运行：
@@ -42,6 +68,7 @@ python main.py sample --video input_videos/match.mp4 --start 1:00 --end 1:30 --s
 
 ## 3. 认识页面
 
+
 左侧为截图和切帧工具；右侧为当前单位和动作输入。下方为标尺、英雄资料、策略以及独立的可选推演面板。主页面按钮对应：
 
 顶部 Language / 语言在中文和 English 之间切换，不改变数据 ID 或翻译用户备注。命令行参数和表格字段保持英文。
@@ -70,11 +97,11 @@ python main.py sample --video input_videos/match.mp4 --start 1:00 --end 1:30 --s
 
 单方超过六只且未明确选择时，导出会要求先选择，避免自动猜测多波身份；并非六只上限。只想测英雄距离可点击“只测英雄之间”。输入 `[]` 也表示此模式。
 
-## 5. 标注坐标、动作和相位
+## 5. 标注坐标、动作和攻击阶段
 
 按同一原图像素口径定位完整血条中心；不要用剩余彩色血量段的中心。彩色候选为橙色虚线框，只提供查找提示，不能直接证明完整血条或阵营。
 
-动作建议统一采用 attack、技能标识、move、wait、death 等；相位可用 windup、committed、impact、recovery，必要时写备注。目标选择具体单位 ID；动作开始/结束填写源视频秒数。一个动作跨几张截图持续出现时，开始时间保持相同，不能按截图数增加攻击次数。
+动作建议统一采用 attack、技能标识、move、wait、death 等；攻击阶段可用 windup、committed、impact、recovery，必要时写备注。目标选择具体单位 ID；动作开始/结束填写源视频秒数。一个动作跨几张截图持续出现时，开始时间保持相同，不能按截图数增加攻击次数。
 
 生命值按数值或比例记录均可，但必须在备注说明口径；不能把百分比直接作为推演用的实际 HP。确认阵亡时设置 alive=false 或动作 death，该帧起不再记录该单位距离。看不清设置未知，不等于死亡。错误死亡标注需要回到原帧更正，否则后续会一直排除。
 
@@ -102,11 +129,43 @@ python main.py sample --video input_videos/match.mp4 --start 1:00 --end 1:30 --s
 python main.py import-table runs/session/clip_01 edited_events.csv
 ```
 
-保留 frame_id、unit_id；不要新建重复行。改 x_px、y_px、动作或相位后导回，脚本重新计算派生距离，手写距离列不会覆盖计算。默认 UTF-8 BOM；明确使用其他编码时可加 --encoding。已经写进源文件的字面问号无法靠转码恢复。
+保留 frame_id、unit_id；不要新建重复行。改 x_px、y_px、动作或攻击阶段后导回，脚本重新计算派生距离，手写距离列不会覆盖计算。默认 UTF-8 BOM；明确使用其他编码时可加 --encoding。已经写进源文件的字面问号无法靠转码恢复。
 
 AI 可按 [JSON 格式](workflow.md#4-ai工程接口) 输出 annotations.json，使用页面导入或直接写入工作区。名册已有的 ID 才能引用，AI 坐标保持 reviewed=false，人工核对后再确认。先备份原标注，避免导入覆盖。
 
 ## 8. 可选机制观察与博弈
+
+单位管理提供三种不同处理：“当前帧不可见”只取消这一帧的显示与距离计算，不推断阵亡；“确认此帧起阵亡”停止后续记录；“删除误建单位”清除全片段中的该单位和目标引用，修改前自动备份。勾选“显示隐藏或阵亡的单位”可找回已隐藏项目。删除后的 ID 不再复用。
+
+“运行分析任务”保存当前证据并生成 `assessment_bundle.zip`，然后交给正在运行的 Skill 自动读取、核验和分析。报告完成后在页面显示分项评分、综合评分、时间轴依据与建议；按钮本身不先计算临时评分。页面无法唤醒空闲的 AI 对话，请在 Skill 对话中说“处理工作台分析请求”。
+
+Unit management distinguishes frame-local invisibility, confirmed death from
+this frame, and deletion of a mistaken roster entry. Deletion backs up records
+and clears target references; IDs are never reused. Show hidden/dead units to
+restore a hidden entry. Run analysis prepares an assessment bundle for the
+active Skill to read and analyse, rather than assigning provisional scores in
+the browser. Ask the Skill conversation to process the workbench analysis
+request; completed reports appear in the analysis page.
+
+配置页也提供“请求 SKILL 协助填入当前帧配置”和“请求 SKILL 一次性填入所有帧配置”。先选好版本和全局英雄、符文及召唤师技能。Skill 读取原始截图，把可确认的等级、装备、技能加点和当前状态回填到对应时间点；无法看到的冷却、层数等保留未知，不覆盖玩家已有记录。自动属性继续使用版本基础数据、等级、装备固定加成和属性碎片计算。
+
+全部帧任务期间，工作台刷新及编辑暂停，已处理部分不会提前宣告完成。Skill 检查全部帧后会在对话里说明完成项、未知项和待复核项，再提示刷新；中途可点击“取消批量任务”保留已写入草稿。浏览器自身的刷新不能被强制禁用，重新打开页面后仍会恢复任务锁定状态。
+
+自动胜率查询使用 Lolalytics 公开网页解析，并非数据 API；失败时生成 Skill 联网查询请求。Skill 核实版本、英雄方向和来源后回填全等级胜率。找不到时保留原值；未填写胜率默认 50:50，不拿其他版本或击杀率代替。
+
+Configuration assistance is available for the current frame or all frames.
+Choose the patch and global champions, runes and summoner spells first. The
+Skill fills only observable per-frame state, preserving player entries and
+leaving unknown cooldowns or stacks blank. Static attributes still come from
+patch data, level, fixed item bonuses and stat shards.
+
+All-frame tasks pause workbench refresh and editing until every requested frame
+has been inspected. The Skill replies in the conversation with completed,
+unknown and review items. Cancelling retains saved drafts. Browser reload cannot
+be forbidden; a pending task restores its lock after reload. Matchup-rate
+retrieval parses a Lolalytics webpage rather than a data API, then falls back to
+a Skill web-search request. Verified rates retain patch and source; missing
+rates retain the existing value or the neutral 50:50 default.
 
 普通评估可以跳过这一节。需要短时反事实时，切到决策帧并生成任务，不预置任何英雄数据；概率观察表也不会自动认出录像中的机制。按 [完整推演指南](short_horizon.md) 核验参数、输入候选、记录独立机会和适用条件，再选择 compare、zero_sum 或 general_sum。
 

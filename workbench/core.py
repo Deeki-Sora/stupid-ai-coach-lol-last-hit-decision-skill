@@ -75,22 +75,26 @@ def default_calibration():
 def probe(path):
     if not shutil.which('ffprobe'):
         raise RuntimeError('ffprobe is required; install FFmpeg and refresh PATH')
-    data = json.loads(subprocess.check_output(['ffprobe','-v','quiet','-show_format','-show_streams','-of','json',str(path)]))
+    data = json.loads(subprocess.check_output(['ffprobe','-v','quiet','-show_format','-show_streams','-of','json',str(path)],timeout=30))
     video = next((s for s in data['streams'] if s['codec_type']=='video'),None)
     if video is None:
         raise ValueError('no video stream')
     return dict(duration=float(data['format']['duration']),width=video['width'],height=video['height'])
 
 
-def sample(video, output, start, end, step, first_wave_template=False):
+def sample(video, output, start, end, step, first_wave_template=False, progress=None):
     video, output = Path(video).resolve(), Path(output).resolve()
     if not .1 <= step <= .5:
         raise ValueError('sampling interval must be between 0.1 and 0.5 seconds')
     if not 0 <= start < end:
         raise ValueError('require 0 <= start < end')
     info = probe(video)
-    if end > info['duration']+.05:
-        raise ValueError('end exceeds video duration')
+    if not math.isfinite(info['duration']) or info['duration'] <= 0:
+        raise ValueError('Cannot determine a finite video duration')
+    if start >= info['duration']:
+        raise ValueError(f'Start time {start:g}s must be before video duration {info["duration"]:g}s')
+    if end > info['duration']:
+        raise ValueError(f'End time {end:g}s exceeds video duration {info["duration"]:g}s')
     if not shutil.which('ffmpeg'):
         raise RuntimeError('ffmpeg is required')
     output.mkdir(parents=True,exist_ok=False)
@@ -98,10 +102,23 @@ def sample(video, output, start, end, step, first_wave_template=False):
     log = output/'sampling_ffmpeg.log'
     # Select actual source frames rather than synthesizing intermediate frames.
     select = f"trim=duration={end-start:.9f},select='isnan(prev_selected_t)+gte(t-prev_selected_t,{step-1e-6:.9f})',showinfo"
-    command = ['ffmpeg','-hide_banner','-ss',str(start),'-t',str(end-start),'-i',str(video),
+    command = ['ffmpeg','-nostdin','-hide_banner','-ss',str(start),'-t',str(end-start),'-i',str(video),
                '-vf',select,'-fps_mode','vfr','-q:v','2',str(frames/'frame_%06d.jpg')]
     with log.open('w',encoding='utf-8') as handle:
-        subprocess.run(command,stdout=subprocess.DEVNULL,stderr=handle,check=True)
+        import time
+        with subprocess.Popen(command,stdin=subprocess.DEVNULL,stdout=subprocess.DEVNULL,stderr=handle) as process:
+            started = time.monotonic()
+            while process.poll() is None:
+                if progress:
+                    progress({'stage':'extracting','frame_count':len(list(frames.glob('frame_*.jpg'))),
+                              'expected_frames':math.ceil((end-start)/step), 'elapsed_s':round(time.monotonic()-started,1)})
+                if time.monotonic()-started > max(120,(end-start)*10):
+                    process.kill()
+                    process.wait()
+                    raise RuntimeError('FFmpeg timed out. See '+str(log))
+                time.sleep(.25)
+            if process.returncode:
+                raise RuntimeError('FFmpeg failed. See '+str(log))
     pts = []
     for line in log.read_text(encoding='utf-8',errors='replace').splitlines():
         m = re.search(r'\bn:\s*(\d+).*?\bpts_time:([-+\d.eE]+)',line)
@@ -110,11 +127,17 @@ def sample(video, output, start, end, step, first_wave_template=False):
     files = sorted(frames.glob('frame_*.jpg'))
     if not files or len(files)!=len(pts):
         raise RuntimeError('sample images and logged frame timestamps differ; inspect sampling_ffmpeg.log')
+    # Each decoded source frame gets its own image file.  Do not create contact
+    # sheets or montage images: one project frame must map to one screenshot.
     sampled = [dict(id=f'f{i:06d}',source_time_s=round(start+t,6),
                     image=p.relative_to(output).as_posix()) for i,(t,p) in enumerate(zip(pts,files),1)]
+    if progress:
+        progress({'stage':'hashing','frame_count':len(files)})
     project = dict(schema_version=1,source_name=video.name,source_sha256=sha256(video),
         media=info,start_s=start,end_s=end,step_s=step,frames=sampled,calibration=None,
         units=default_units() if first_wave_template else [u for u in default_units() if u['kind']=='hero'],hero_data={'blue':{},'red':{}},strategy_text='',
+        frame_count=len(sampled),
+        frame_policy='one_decoded_source_frame_per_image; no contact sheets or montages',
         timestamp_note='Decoded frame PTS after input seeking; source time = requested start + relative PTS.')
     write_json(output/'project.json',project)
     write_json(output/'annotations.json',{'schema_version':1,'frames':{}})
@@ -200,6 +223,8 @@ def validate_annotations(project, annotations):
             points.append(unit.get('center'))
             if unit.get('target') and unit['target'] not in ids:
                 raise ValueError('unknown target id')
+            if 'visible' in unit and unit['visible'] is not None and not isinstance(unit['visible'],bool):
+                raise ValueError('visible must be true, false or null')
             if 'alive' in unit and unit['alive'] is not None and not isinstance(unit['alive'],bool):
                 raise ValueError('alive must be true, false or null (unknown)')
             if 'reviewed' in unit and not isinstance(unit['reviewed'],bool):
@@ -244,7 +269,7 @@ def export_tables(directory):
                     last_confirmed_alive_s=last_alive.get(uid),confirmed_dead_by_s=f['source_time_s']))
                 dead.add(uid)
             elif data.get('alive') is True and uid not in dead:last_alive[uid]=f['source_time_s']
-        active=[u for u in p['units'] if u['id'] not in dead and
+        active=[u for u in p['units'] if u['id'] not in dead and labelled.get(u['id'],{}).get('visible') is not False and
             (u.get('first_seen_s') is None or f['source_time_s']>=u['first_seen_s'])]
         if 'distance_minions' in annotation:persistent_selection=annotation['distance_minions']
         selected=persistent_selection
@@ -253,7 +278,7 @@ def export_tables(directory):
             if any(sum(u['id'] in selected and u['side']==side for u in active)>6 for side in ('blue','red')):
                 raise ValueError(f"{f['id']}: overlapping/cannon wave; explicitly select distance_minions (any number; no six-minion limit)")
         scope={u['id'] for u in active if u['kind']=='hero' or u['id'] in selected}
-        obs=Observation(f['source_time_s'],{uid:data.get('center') for uid,data in labelled.items() if uid not in dead},annotation.get('origin'),annotation.get('scale_id','unscaled_pixels'))
+        obs=Observation(f['source_time_s'],{uid:data.get('center') for uid,data in labelled.items() if uid not in dead and data.get('visible') is not False},annotation.get('origin'),annotation.get('scale_id','unscaled_pixels'))
         for u in active:
             uid=u['id'];data=labelled.get(uid,{})
             center=data.get('center');local=position(obs,uid)
@@ -345,12 +370,12 @@ def export_assessment(directory, bundle=True):
     ready=all(hero_data.get(side,{}).get('verified_effective_state') is True and hero_data.get(side,{}).get('effective_state') for side in ('blue','red'))
     write_json(dest/'manifest.json',dict(schema_version=1,hero_parameters_declared_verified=bool(ready),source_name=p['source_name'],source_sha256=p['source_sha256'],
         start_s=p['start_s'],end_s=p['end_s'],step_s=p['step_s'],calibration=p.get('calibration'),coverage=summary,
-        files={f.relative_to(directory).as_posix():sha256(f) for folder in ['frames','tables','game_analysis','mechanics','templates','catalogs','references'] for f in (directory/folder).rglob('*') if f.is_file()},
+        files={f.relative_to(directory).as_posix():sha256(f) for folder in ['frames','tables','game_analysis','mechanics','templates','catalogs','references','assistant'] for f in (directory/folder).rglob('*') if f.is_file()},
         framework_sha256={name:sha256(dest/name) for name in documents.values()}))
     if bundle:
         archive=directory/'assessment_bundle.zip'
         with zipfile.ZipFile(archive,'w',zipfile.ZIP_DEFLATED,compresslevel=1) as output:
-            for name in ['project.json','annotations.json','frames','tables','assessment','game_analysis','mechanics','templates','catalogs','references']:
+            for name in ['project.json','annotations.json','frames','tables','assessment','game_analysis','mechanics','templates','catalogs','references','assistant']:
                 path=directory/name
                 for f in ([path] if path.is_file() else sorted(path.rglob('*'))):
                     if f.is_file():output.write(f,f.relative_to(directory).as_posix())

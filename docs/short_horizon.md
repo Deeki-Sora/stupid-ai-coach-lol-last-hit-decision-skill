@@ -1,6 +1,6 @@
 # 可选短时事件推演与博弈工具
 
-英雄、符文与装备可通过 [可视化配置界面](loadout_selection.md)选择。任务草稿携带介入帧之前最近的等级、加点和背包快照，以及锁定补丁的静态资料；后续快照不会回流到当前决策。选择器提供名称和 ID，外部网页数值不作为规则。rules.verified、地面坐标、有效攻速、攻击相位和复杂机制仍需核验，不会因选好装备或符文而自动通过。
+英雄、符文与装备可通过 [可视化配置界面](loadout_selection.md)选择。任务草稿携带介入帧之前最近的等级、加点和背包快照，以及锁定补丁的静态资料；后续快照不会回流到当前决策。选择器提供名称和 ID，外部网页数值不作为规则。rules.verified、地面坐标、有效攻速、攻击攻击阶段和复杂机制仍需核验，不会因选好装备或符文而自动通过。
 
 ## 1. 介入位置与安装
 
@@ -24,7 +24,7 @@ python -m pip install -r requirements-game.txt
 
 ## 2. 工作台操作
 
-1. 先在截图页完成双方单位、攻击目标、相位与死亡核验，保存。
+1. 先在截图页完成双方单位、攻击目标、攻击阶段与死亡核验，保存。
 2. 切到打算开始决策的帧，点击“以当前帧生成任务”。entry_time_s 为该帧视频时间；任务内所有 at_s、ready_in_s 和 horizon_s 均相对该时刻。默认预测三秒，可设置正数至三十秒。
 3. 草稿只有可追踪单位身份与观察引用，没有推测出来的英雄数值。以人工或 AI 填完下面的参数，核验后设置 rules.verified=true。不要直接把血条像素或统一像素比例当成精确地面位置。
 4. 输入双方候选策略，每方 1–8 种，可只输入一方的多种候选和另一方的一个条件回应。最初建议少量候选，先运行 compare。概率任务最多 16 个策略组合、每组 1–64 个同种子情景。
@@ -58,7 +58,7 @@ python main.py game-run runs/session/clip_01 --task task.json
 | units[id] | side、kind、position、hp/max_hp、radius、move_speed、hp_regen_s、armor、magic_resist |
 | units[id].resource_model | mana 或 none；mana、max_mana、mana_regen_s 必须与之匹配。能量、怒气等不在这个适配器内 |
 | units[id].attack | 有效 attack_speed、period_s=1/attack_speed、windup_s、range、edge_to_edge 范围、missile_speed、ready_in_s、damage |
-| units[id].phase / movement | 当前攻击/施法相位，以及 verified 和 destination；已有移动不能隐去 |
+| units[id].phase / movement | 当前攻击/施法攻击阶段，以及 verified 和 destination；已有移动不能隐去 |
 | 英雄额外字段 | level、累计 xp、next_level_xp、有效 gold_multiplier / xp_multiplier |
 | 小兵额外字段 | gold_reward、xp_reward、locked_target；无目标时需 idle_verified_until_s 证明预测窗口内保持该状态 |
 | units[id].skills | 使用的技能有效参数，见下文；未学习的 rank=0 不可释放 |
@@ -71,7 +71,7 @@ python main.py game-run runs/session/clip_01 --task task.json
 
 只对特定兵种生效的伤害应使用 damage.by_target_kind，为对应 kind 提供完整伤害包，不能把小兵互殴加成误用到英雄。来源相关的穿透或最终减伤可提供已经核验的 mitigation_multiplier 覆盖通常的护甲/魔抗倍率，并说明来源；不提供时使用目标护甲/魔抗。护盾按声明顺序吸收，特殊优先级需另外适配。
 
-## 4. 候选动作和初始相位
+## 4. 候选动作和初始攻击阶段
 
 ```json
 {"id":"candidate","commands":[

@@ -89,7 +89,13 @@ def validate_setup(setup, catalog):
         champion = selected.get('champion')
         if champion is not None and champion not in catalog['champions']:
             raise ValueError('Unknown champion in selected patch')
-        result['sides'][side] = dict(champion=champion, rune_page=rune_page(selected.get('rune_page'), catalog))
+        summoners={}
+        for slot in ('slot1','slot2'):
+            choice=(selected.get('summoner_spells') or {}).get(slot,{})
+            if not isinstance(choice,dict) or any(not isinstance(choice.get(k,''),str) for k in ('id','name')):
+                raise ValueError('Summoner spell choices require text IDs/names')
+            summoners[slot]={key:choice.get(key,'').strip() for key in ('id','name')}
+        result['sides'][side] = dict(champion=champion, rune_page=rune_page(selected.get('rune_page'), catalog),summoner_spells=summoners)
     return result
 
 
@@ -114,18 +120,28 @@ def validate_state(state, catalog):
     for entry in items:
         slot, ident = entry.get('slot'), str(entry.get('id'))
         number(slot, 'inventory slot', 0, 6, True)
-        if slot in used or ident not in catalog['items']:
-            raise ValueError('Duplicate inventory slot or unknown item')
+        if slot in used:
+            raise ValueError('Duplicate inventory slot')
         used.add(slot)
+        quantity = entry.get('quantity', 1)
+        if ident not in catalog['items']:
+            # A player may record an item name that is absent from the local
+            # patch catalog. Preserve the name for review, but do not invent
+            # stats; automatic equipment arithmetic skips this entry.
+            name = str(entry.get('name') or ident).strip()
+            if not name:
+                raise ValueError('Unknown item needs a manual name')
+            number(quantity, 'item quantity', 1, 999, True)
+            clean.append(dict(slot=slot, id='', name=name[:120], quantity=quantity, data_unresolved=True))
+            continue
         item = catalog['items'][ident]
         if not item.get('maps', {}).get('11'):
             raise ValueError('Item is not available on Summoner\'s Rift in this patch')
         trinket = 'Trinket' in item.get('tags', [])
         if trinket != (slot == 6):
             raise ValueError('Trinkets use slot 6; ordinary items use slots 0 to 5')
-        quantity = entry.get('quantity', 1)
         number(quantity, 'item quantity', 1, max(1, item.get('stacks', 1)), True)
-        clean.append(dict(slot=slot, id=ident, quantity=quantity))
+        clean.append(dict(slot=slot, id=ident, name=entry.get('name',''), quantity=quantity))
     event=state.get('event_state',{})
     if not isinstance(event,dict):raise ValueError('event_state must be an object')
     observed={}
@@ -180,13 +196,17 @@ def validate_state(state, catalog):
         if value is not None and spec[1] is not None and value>spec[1]:raise ValueError('rune stacks exceed declared maximum')
         observed['rune_stacks'][str(ident)]=value
     observed['skills']={}
-    skill_fields=('range','remaining_cooldown_s','damage','per_target_cooldown_s','resource_cost','cast_time_s','missile_speed')
+    skill_fields=('range','remaining_cooldown_s','damage','per_target_cooldown_s','resource_cost','cast_time_s','missile_speed',
+                  'last_cast_time_s','cooldown_multiplier','charges_remaining')
     for key,skill in skills.items():
         if key not in ('Q','W','E','R') or not isinstance(skill,dict):raise ValueError('invalid skill event state')
         observed['skills'][key]={}
         for field in skill_fields:
             value=skill.get(field)
-            if value is not None:number(value,key+'.'+field)
+            if value is not None:
+                number(value,key+'.'+field,low=-1e9 if field=='last_cast_time_s' else 0)
+            if field=='cooldown_multiplier' and value is not None and value<=0:raise ValueError(key+'.cooldown_multiplier must be positive')
+            if field=='charges_remaining' and value is not None and value%1:raise ValueError(key+'.charges_remaining must be an integer')
             observed['skills'][key][field]=value
         damage_type=skill.get('damage_type')
         if damage_type not in (None,'physical','magic','true'):raise ValueError('invalid damage type')
@@ -218,18 +238,38 @@ def save_configuration(directory, payload):
     catalog = read_json(catalog_path(directory, config['match_setup']['patch']))
     setup = validate_setup(config['match_setup'], catalog)
     previous = project.get('configuration', {}).get('match_setup')
+    if previous and previous.get('patch')==setup['patch']:
+        previous=validate_setup(previous,catalog)
     if previous and previous != setup and payload.get('replace_fixed_setup') is not True:
         raise ValueError('Fixed match selections changed; explicitly unlock/correct them first')
     snapshots, times = [], set()
+    annotation_path=directory/'annotations.json'
+    annotated_frames=read_json(annotation_path).get('frames',{}) if annotation_path.exists() else {}
     for snap in config.get('snapshots', []):
         time = number(snap['source_time_s'], 'snapshot source time')
         if time in times:
             raise ValueError('Duplicate snapshot time')
         times.add(time)
-        snapshots.append(dict(source_time_s=time, sides={side: validate_state(snap.get('sides', {}).get(side), catalog) for side in SIDES}))
+        states={side:validate_state(snap.get('sides',{}).get(side),catalog) for side in SIDES}
+        for side,state in states.items():
+            for slot,choice in setup['sides'][side]['summoner_spells'].items():
+                observed=state['event_state']['summoner_spells'][slot]
+                for key in ('id','name'):
+                    if choice[key]:observed[key]=choice[key]
+        matching=next((f for f in project['frames'] if abs(f['source_time_s']-time)<1e-6),None)
+        fid=snap.get('frame_id') or (matching['id'] if matching else None)
+        if fid is not None and not any(f['id']==fid and abs(f['source_time_s']-time)<1e-6 for f in project['frames']):
+            raise ValueError('Snapshot frame and source-video time must match')
+        clock=snap.get('game_time_s')
+        if clock is None and fid:clock=annotated_frames.get(fid,{}).get('game_time_s')
+        if clock is not None:
+            from .core import seconds
+            if isinstance(clock,bool) or not isinstance(clock,(str,int,float)) or not math.isfinite(seconds(str(clock))) or seconds(str(clock))<0:
+                raise ValueError('Invalid snapshot game clock')
+        snapshots.append(dict(source_time_s=time,frame_id=fid,game_time_s=clock,sides=states))
     if previous and previous['patch'] != setup['patch'] and snapshots and not payload.get('replace_all'):
         raise ValueError('Changing patch requires clearing old snapshots')
-    if previous and any(previous['sides'][s]['champion'] != setup['sides'][s]['champion'] for s in SIDES) and snapshots and not payload.get('replace_all'):
+    if previous and any(previous['sides'][s]['champion'] and previous['sides'][s]['champion'] != setup['sides'][s]['champion'] for s in SIDES) and snapshots and not payload.get('replace_all'):
         raise ValueError('Changing champion requires clearing old snapshots')
     # Persist exact spell/passive data now so a copied assessment bundle works offline.
     for selected in setup['sides'].values():
@@ -252,13 +292,15 @@ def configuration_at(directory, project, source_time_s):
     result = {}
     for side in SIDES:
         fixed = setup['sides'][side]
-        state = snap['sides'][side] if snap else dict(level=None, spell_ranks={}, items=[], inventory_known=False)
+        state = deepcopy(snap['sides'][side]) if snap else dict(level=None, spell_ranks={}, items=[], inventory_known=False)
+        for slot,choice in fixed.get('summoner_spells',{}).items():
+            state.setdefault('event_state',{}).setdefault('summoner_spells',{}).setdefault(slot,{}).update({k:v for k,v in choice.items() if v})
         champion = fixed['champion']
         details = champion_details(directory, setup['patch'], champion) if champion else None
         raw = details['locales']['en_US'] if details else {}
         page = fixed['rune_page']
         ids = [i for i in page['primary'] + page['secondary'] if i is not None]
-        selected_items = [dict(**item, data=catalog['items'][item['id']]) for item in state['items']]
+        selected_items = [dict(**item, data=catalog['items'].get(item.get('id')) if item.get('id') else None) for item in state['items']]
         # Keep data-file fields raw: tooltips can have unresolved variables, and modifiers are not universally additive.
         spell_refs = {}
         for key, spell in zip(('Q', 'W', 'E', 'R'), raw.get('spells', [])):
@@ -274,6 +316,9 @@ def configuration_at(directory, project, source_time_s):
             spells=spell_refs, base_growth_reference=base_growth_reference(raw.get('stats', {}), state['level']),
             effective_state=deepcopy(state), verified_effective_state=False,
             selected_at_source_time_s=snap['source_time_s'] if snap else None, requested_at_source_time_s=source_time_s,
+            selected_at_game_time_s=snap.get('game_time_s') if snap else None,
+            selected_frame_id=snap.get('frame_id') if snap else None,
+            summoner_spells=deepcopy(fixed.get('summoner_spells',{})),
             sources=dict(catalog=catalog['sources'], champion=details['sources'] if details else {}),
             calculation_status='selection_and_static_references_only',
             missing_mechanisms=['Effective stats, windup, missile travel, champion/rune/item effects and current stacks need verified rule adapters.'])

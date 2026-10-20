@@ -27,7 +27,7 @@ SimPy、pomdp_py、PyGambit、OpenSpiel 等仍供外部机制适配与搜索扩�
 
 颜色填充候选可用 `python -m pip install -r requirements-vision.txt` 安装 Pillow，再在 sample 子命令加 `--proposals`。候选不是已确认的血条中心，需要复核。
 
-浏览器自动化测试为开发可选项：`python -m pip install -r requirements-test.txt` 后运行 `python -m playwright install chromium`；再运行 tests/ 下的测试。使用本机 Edge 时可设置环境变量 `LOL_BROWSER_CHANNEL=msedge`，不需要安装 Chromium。实际使用工作台只需普通浏览器，不需要 Playwright。
+实际使用工作台只需普通浏览器，不需要安装 Playwright。
 
 ## 视频编辑工具
 

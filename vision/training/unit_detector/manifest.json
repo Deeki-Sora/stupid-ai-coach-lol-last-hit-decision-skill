@@ -1,0 +1,156 @@
+{
+  "schema_version": 1,
+  "resolution": [
+    1920,
+    1080
+  ],
+  "files": [
+    {
+      "split": "train",
+      "image": "images/train/azir130.png",
+      "label": "labels/train/azir130.txt",
+      "image_sha256": "bd179baf6582ebd890d5f455fe0a3238ca69196fbf0062aba545112540de4733",
+      "label_sha256": "054f426c92125a049f4e2d2cf3583e722aab950326838498bec6c3d560d24626"
+    },
+    {
+      "split": "train",
+      "image": "images/train/azir130b.png",
+      "label": "labels/train/azir130b.txt",
+      "image_sha256": "1a7c0177e1ffb05826fa94eaaa711aa8dd246c8bab7ad98a23fe35aaf7ba8ab9",
+      "label_sha256": "8963a558a612446961b129bb85198e797254ce8c5db272d9791b55e112677468"
+    },
+    {
+      "split": "train",
+      "image": "images/train/azir_100s.png",
+      "label": "labels/train/azir_100s.txt",
+      "image_sha256": "ac2a8a75f5159f71c9eda5fd9a24f12028516a65a8d8d7e6ad5711e3549b4879",
+      "label_sha256": "e728310433efcbd21d6cec18d272638c121b18371e815b8b1e0bd19a552648d2"
+    },
+    {
+      "split": "train",
+      "image": "images/train/azir_140s.png",
+      "label": "labels/train/azir_140s.txt",
+      "image_sha256": "98f8b3dfa63ca30d302a07e6b6a5fc69be02400dd7f2c3999ca6492a75425de8",
+      "label_sha256": "28f95f74079f4c9da02c811ce123be6af2c389453eedf569dd9e402b08cf1c01"
+    },
+    {
+      "split": "train",
+      "image": "images/train/azir_35s.png",
+      "label": "labels/train/azir_35s.txt",
+      "image_sha256": "9fd2f99a0cc5563791f736da610fa67d4f2746271b5963fe0df330646c001ebb",
+      "label_sha256": "a8d08eb56fa00207c92d22accb17b5d75d36088007fcc9e9001fba75aab0c64d"
+    },
+    {
+      "split": "train",
+      "image": "images/train/azir_40s.png",
+      "label": "labels/train/azir_40s.txt",
+      "image_sha256": "c675ea0ecd1c87a67d4fd431c1fe948f70521872daed155aad856c19ebf0accd",
+      "label_sha256": "e3f8d28702089937516c8f6447b57f23262d1de566297f4b153d697419755368"
+    },
+    {
+      "split": "train",
+      "image": "images/train/azir_45s.png",
+      "label": "labels/train/azir_45s.txt",
+      "image_sha256": "cc78c0ce5043993d1c7880b7e2838f901852922248abd8f9eebe31da252a4646",
+      "label_sha256": "885dbb69a01d366205c465713cec2f72d9959f7a975ed6f5737b8896babde87c"
+    },
+    {
+      "split": "train",
+      "image": "images/train/azir_siege_104s.png",
+      "label": "labels/train/azir_siege_104s.txt",
+      "image_sha256": "c662d60f0ff5d0765c14912326ae9866daa14be4059d5df63637e07296516466",
+      "label_sha256": "86b4b975d196c6c0ca676ba6a70a0cd79869f79e4b4de1df45d34e631a52538f"
+    },
+    {
+      "split": "train",
+      "image": "images/train/azir_siege_96s.png",
+      "label": "labels/train/azir_siege_96s.txt",
+      "image_sha256": "bd6c82bbaf6df1fb931d571d49a4641fe7dcd912a63d46d63000afdfcd32183d",
+      "label_sha256": "d6ca7e079da7566cea6df4b3b7b56a12cce21ec58186eae665095db4e2b29c62"
+    },
+    {
+      "split": "train",
+      "image": "images/train/chovy130.png",
+      "label": "labels/train/chovy130.txt",
+      "image_sha256": "bbf04e823a422590346e314bbba79ddada7ae8eb10f7a0a841ad4f824543a0ae",
+      "label_sha256": "9230364db4d158a1e5a89324e2a14fafbd1289fec1bdad37b52c092c31ba9130"
+    },
+    {
+      "split": "train",
+      "image": "images/train/chovy_68s.png",
+      "label": "labels/train/chovy_68s.txt",
+      "image_sha256": "03467a9db5d5a43d4d59010a8e081d348124d6eb901a4b1d491a14710116b8d2",
+      "label_sha256": "bb1a64aa023b1f47567ccdb8f3589b43bc42444e7f0c0e69b7d8819a62e080c1"
+    },
+    {
+      "split": "train",
+      "image": "images/train/chovy_72s.png",
+      "label": "labels/train/chovy_72s.txt",
+      "image_sha256": "4a00957e73d11fd883cd43ed60a91733861ba4bdd8184d1ae80b3bd6fa3b013e",
+      "label_sha256": "c40fa0497cde5afdc99fa156135c3e3c0232532f33ab5cc9daca2d3675b07e34"
+    },
+    {
+      "split": "train",
+      "image": "images/train/yasuo_12s.png",
+      "label": "labels/train/yasuo_12s.txt",
+      "image_sha256": "59db38fd8b0f30777fb5efae21d31d6bbee1c2dec6fd6bc86785c6704d7ff060",
+      "label_sha256": "5c1006dbd0ec62dd25abd92dfa7cbab1a534221498c195f37f08ee079995638b"
+    },
+    {
+      "split": "train",
+      "image": "images/train/yasuo_5s.png",
+      "label": "labels/train/yasuo_5s.txt",
+      "image_sha256": "54fe7a9b176c256dbbe94e98215c4c76c48690f0c3a0f127151724a00bcd562e",
+      "label_sha256": "5bee0516a7c64ca7f14980979fe9e5bf1196e3721a4e5d62a75e189b93886ebe"
+    },
+    {
+      "split": "train",
+      "image": "images/train/yone_pov_110s.png",
+      "label": "labels/train/yone_pov_110s.txt",
+      "image_sha256": "fe49927d4dee69647a180f8f5a9c558a3395e1af81c0f69834b88ac3fb056800",
+      "label_sha256": "cb933bf49588e6c21c2e27e172c8303950ca52423c489639dc1c3abb3b6fad8e"
+    },
+    {
+      "split": "train",
+      "image": "images/train/yone_pov_90s.png",
+      "label": "labels/train/yone_pov_90s.txt",
+      "image_sha256": "2f3950fe69bbe544da1f635dfd40cf616147f3bc678fa6d6a1b4aa81ca6c162e",
+      "label_sha256": "6d3106bd84b6bd25381fdad3ae7744f8797d03794e657094b6d0bcbc52fc384e"
+    },
+    {
+      "split": "val",
+      "image": "images/val/faker_115s.png",
+      "label": "labels/val/faker_115s.txt",
+      "image_sha256": "df93648be4bbfc25dd42cc0c1ce08d31998cffbc6dd74dad76f35468a0eb3bcb",
+      "label_sha256": "587e0319f3fc040f5852c288c45594b99bcaa20673d06cebae802df1501e7387"
+    },
+    {
+      "split": "val",
+      "image": "images/val/faker_155s.png",
+      "label": "labels/val/faker_155s.txt",
+      "image_sha256": "5a92ce7d2feac8a0d82c4ac94bd123b2c5b9f266fdb7b33e1e21d36db0e74d0c",
+      "label_sha256": "a0693524b860f5b10ec0882f26c9a482b9e61c18e917124a9f8114c1c33ab5f3"
+    },
+    {
+      "split": "val",
+      "image": "images/val/faker_87s.png",
+      "label": "labels/val/faker_87s.txt",
+      "image_sha256": "7489f25fe02f791bcc3852c909386559ee9543ea7253e416327b2e2cdd0c552d",
+      "label_sha256": "c0a1c4bc9b6af142f3c1daf0a88fb880c665e538503602f159a5d71a06bdc2fb"
+    },
+    {
+      "split": "val",
+      "image": "images/val/faker_89s.png",
+      "label": "labels/val/faker_89s.txt",
+      "image_sha256": "68318597408b9a4d9b95beed09803ae210d8cf594eb3fabb98b864f9131161c1",
+      "label_sha256": "b5f5f5b55efe64b19bc7338e3a53a57025af25ec138f1ac1c95ac583a5469e58"
+    },
+    {
+      "split": "val",
+      "image": "images/val/faker_91s.png",
+      "label": "labels/val/faker_91s.txt",
+      "image_sha256": "4f8ed1bf1dc0e8bf70a38802ef72d3ac4c7a5652cf428a57fc2c4ef66b02b1a3",
+      "label_sha256": "20004035f4490fa09ba8204b81617732225133d016c44b395ba4aad5fa60a9d0"
+    }
+  ]
+}

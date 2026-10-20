@@ -74,6 +74,9 @@ def subtotal(reference,native,overrides):
             if field in ('armor_penetration_percent','magic_penetration_percent','tenacity','slow_resist'):auto[field]=1-(1-auto[field])*(1-value)
             else:auto[field]+=value
     for entry in reference.get('items',[]):
+        if not entry.get('data'):
+            notes.append('unresolved_item_name:'+str(entry.get('name') or entry.get('id') or 'unknown'))
+            continue
         components,unknown=item_components(entry['data']);quantity=entry['quantity']
         for field,value in components.items():
             if field=='move_speed_percent':percent_move+=value*quantity

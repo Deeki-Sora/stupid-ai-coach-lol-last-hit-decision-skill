@@ -8,5 +8,5 @@
 - Confirmed death persists from its annotation frame onward; unknown visibility does not imply death. Camera-corrected displacement needs the same texture origin and compatible scale in both frames.
 - Legacy CSVs contain literal damaged text and ambiguous hero_minion_distance_band fields. Preserve their raw bytes and disclose limitations; do not pretend transcoding restores lost annotations.
 - Freeze historical score_intervals.py and interval_v1 bytes under example/yasuo_vs_veigar/reevaluation_v091/. New evidence or scoring rules require a separately identified version. A1/A2 are one match, not independent samples.
-- Test using unittest discovery in algorithms/ and tests/. Regenerate the release integrity manifest only after intended publication changes; do not change frozen locks to pass checks.
+- This user distribution excludes development tests, temporary runs and machine settings. Keep repository_manifest.json synchronized after intended publication changes; preserve frozen case files and their locks unchanged.
 - Never commit user input recordings, runs, authentication, cookies or machine configuration. Third-party reference media are explicitly excluded from the MIT license.

@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "architecture": "YOLO11n detect",
+  "inference_imgsz": 1920,
+  "models": {
+    "unit_detector": {
+      "file": "unit_detector.pt",
+      "sha256": "880ddcf9fb9c9c74e677d0d7c77495e85ac86a61c6dcd1531c86baf23392c375",
+      "classes": [
+        "blue_melee",
+        "red_melee",
+        "blue_caster",
+        "red_caster",
+        "blue_siege",
+        "red_siege"
+      ],
+      "source_run": "six_classes_no_renders_v1",
+      "epochs": 120,
+      "batch": 1,
+      "imgsz": 1920,
+      "optimizer": "AdamW",
+      "metrics_file": "unit_training_results.csv"
+    },
+    "minion_bar_detector": {
+      "file": "minion_bar_detector.pt",
+      "sha256": "4b9bb4c6607b077a7d96eedb4495c993986276a66ffb1ca35701954e737fdf76",
+      "classes": [
+        "blue_minion_bar",
+        "red_minion_bar"
+      ],
+      "source_run": "minion_bar_detector_fullres_v1",
+      "epochs": 150,
+      "batch": 1,
+      "imgsz": 1920,
+      "optimizer": "auto",
+      "metrics_file": "minion_bar_training_results.csv"
+    },
+    "hero_detector": {
+      "file": "hero_detector.pt",
+      "sha256": "03016f8104cbc89bccdf18dbfb305c5871145c3ce731d67f19b4c49e68f4b303",
+      "classes": [
+        "blue_hero",
+        "red_hero"
+      ],
+      "source_run": "hero_detector_fullres_v1-2",
+      "epochs": 120,
+      "batch": 1,
+      "imgsz": 1920,
+      "optimizer": "AdamW",
+      "metrics_file": "training_summary.json",
+      "training_results_file": "hero_training_results.csv",
+      "metrics": {
+        "metrics/precision(B)": 0.7676266786502735,
+        "metrics/recall(B)": 0.8678627868187556,
+        "metrics/mAP50(B)": 0.8880357142857143,
+        "metrics/mAP50-95(B)": 0.7500714285714286,
+        "fitness": 0.7500714285714286
+      }
+    }
+  }
+}

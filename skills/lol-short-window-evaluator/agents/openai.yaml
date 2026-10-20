@@ -1,0 +1,7 @@
+interface:
+  display_name: "愚蠢的AI教练——一个用来分析LOL真实对局中的补兵决策的SKILL"
+  short_description: "复盘和推演 LOL 对线补兵决策"
+  default_prompt: "使用 $lol-short-window-evaluator 分析工作台中的 LOL 对局证据，并生成可复核的评分和建议。"
+
+policy:
+  allow_implicit_invocation: false

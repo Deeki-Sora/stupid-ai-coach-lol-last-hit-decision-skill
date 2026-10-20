@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["schema_version", "patch", "tier", "level", "sample_size", "source", "blue_win_rate", "red_win_rate"],
+  "properties": {
+    "schema_version": {"type": "integer", "minimum": 1},
+    "patch": {"type": "string", "minLength": 1},
+    "data_patch": {"type": "string", "minLength": 1},
+    "tier": {"type": "string", "minLength": 1},
+    "lane": {"type": "string", "minLength": 1},
+    "level": {"type": ["integer", "string"]},
+    "level_specific": {"type": "boolean"},
+    "level_scope": {"type": "string", "minLength": 1},
+    "sample_size": {"type": "number", "minimum": 0},
+    "sample_size_unknown": {"type": "boolean"},
+    "source": {"type": "string", "minLength": 1},
+    "source_kind": {"type": "string", "minLength": 1},
+    "retrieved_at": {"type": "string", "minLength": 1},
+    "provider": {"type": "string", "minLength": 1},
+    "blue_win_rate": {"type": "number", "exclusiveMinimum": 0, "exclusiveMaximum": 1},
+    "red_win_rate": {"type": "number", "exclusiveMinimum": 0, "exclusiveMaximum": 1}
+  }
+}

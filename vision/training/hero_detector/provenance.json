@@ -1,0 +1,6 @@
+{
+  "schema_version": 1,
+  "license_scope": "Repository-generated gameplay screenshots; source recordings are not redistributed.",
+  "annotation_method": "OpenCV geometry proposals requiring team color, full-width dark border, left level badge and nameplate structure, followed by visual review.",
+  "limitations": "Normal observer view only. First-person yellow self bars are not included in this version."
+}

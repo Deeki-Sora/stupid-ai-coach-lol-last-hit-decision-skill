@@ -1,0 +1,3 @@
+train: images/train
+val: images/val
+names: [blue_minion_bar, red_minion_bar]

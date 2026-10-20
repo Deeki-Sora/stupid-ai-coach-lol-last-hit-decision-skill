@@ -1,0 +1,3 @@
+train: images/train
+val: images/val
+names: [blue_melee, red_melee, blue_caster, red_caster, blue_siege, red_siege]

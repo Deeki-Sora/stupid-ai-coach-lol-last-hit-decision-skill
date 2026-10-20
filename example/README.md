@@ -8,7 +8,6 @@
 
 ```sh
 python example/yasuo_vs_veigar/reevaluation_v091/score_intervals.py
-python scripts/verify_repository.py --examples
 ```
 
 需要重做距离与动作时，使用主程序对原片建立新的工作区，遵循蓝红阵营、单位 ID、完整血条中心和死亡状态口径。不要把旧字段 `hero_minion_distance_band` 拆成凭空猜测的双方数值。

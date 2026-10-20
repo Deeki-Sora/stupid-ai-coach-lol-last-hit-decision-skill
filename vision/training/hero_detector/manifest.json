@@ -1,0 +1,345 @@
+{
+  "schema_version": 1,
+  "resolution": [
+    1920,
+    1080
+  ],
+  "files": [
+    {
+      "split": "train",
+      "image": "images/train/hero_train_001.png",
+      "label": "labels/train/hero_train_001.txt",
+      "image_sha256": "1c868d6b825140270c039b8c2913c588ea326c887d33490db90358cc49a2968a",
+      "label_sha256": "3449878eaac580af26a0ba191fdd606d2da843765ea8018841a7d55026ed77b9"
+    },
+    {
+      "split": "train",
+      "image": "images/train/hero_train_002.png",
+      "label": "labels/train/hero_train_002.txt",
+      "image_sha256": "04ac0842553df074c5ef8893654b5d3f3a1a6a5b95efec77982ebccc2f9edbfc",
+      "label_sha256": "b0514d586e97b89af9e7f4476cf15cd3fbff7d2b8b878c8b672e9aba3d62742c"
+    },
+    {
+      "split": "train",
+      "image": "images/train/hero_train_003.png",
+      "label": "labels/train/hero_train_003.txt",
+      "image_sha256": "39741597ce0fa0000d0a88ff8ae15b1d62921bc6b93dfe99f90a27b34c2854b6",
+      "label_sha256": "9c7dca33ba37f764bea512d927ded814a6ff97d0a15640daa09f2160e8d76c84"
+    },
+    {
+      "split": "train",
+      "image": "images/train/hero_train_004.png",
+      "label": "labels/train/hero_train_004.txt",
+      "image_sha256": "f54ec474b055545037a9642f3470d6927bf1f4ee3bbff2ae2e559dbc4e141bb1",
+      "label_sha256": "a40f27cd9b5be92ea87be94ba187d492e9990f01fef4dd7cb8093e4724e848e3"
+    },
+    {
+      "split": "train",
+      "image": "images/train/hero_train_005.png",
+      "label": "labels/train/hero_train_005.txt",
+      "image_sha256": "4e85f4b4447cab488f35cdf8f429c4af9864bd8f613ab1a5f19d68fd64adb055",
+      "label_sha256": "b2b40ab03628d0f3cf7de2c7853fab98e02e175a86a93ee732b233a4d3e5e7ee"
+    },
+    {
+      "split": "train",
+      "image": "images/train/hero_train_006.png",
+      "label": "labels/train/hero_train_006.txt",
+      "image_sha256": "97784abd6d3bd240f222ca3005b914a80603ebc156f39a843e86f431fefe7ed4",
+      "label_sha256": "b92667616bdb70669d30b026af46a3d738194c136ad37cd912d65c8408b32341"
+    },
+    {
+      "split": "train",
+      "image": "images/train/hero_train_007.png",
+      "label": "labels/train/hero_train_007.txt",
+      "image_sha256": "54bc1beb684e1234f74bc26e5773eeaef6dcdab65c8b62904ee6d4958f6f21de",
+      "label_sha256": "1506043c06c6999c0d6ed9e90c08ff7004b8f1e1e9830a4df39aa31beb27a54f"
+    },
+    {
+      "split": "train",
+      "image": "images/train/hero_train_008.png",
+      "label": "labels/train/hero_train_008.txt",
+      "image_sha256": "b9f5eb904a1922d4702e9f3d56427155a6402550422ed9ef02581457de79c0fa",
+      "label_sha256": "f2977d9c26a2085d8b7bad2504073ba06efc041797568549f9bdc6e857975e54"
+    },
+    {
+      "split": "train",
+      "image": "images/train/hero_train_009.png",
+      "label": "labels/train/hero_train_009.txt",
+      "image_sha256": "412c81dde3bf5d78c6b4308c495fdc6d30cd71bec251bca4ce97d55b73af1f7c",
+      "label_sha256": "5bbcfd9c6d180de8cdb7177a6f17acad4a5fbd6bdedc2816fdcc5dd552b1a4cb"
+    },
+    {
+      "split": "train",
+      "image": "images/train/hero_train_010.png",
+      "label": "labels/train/hero_train_010.txt",
+      "image_sha256": "7cc055aa6b860ffd05d2b0b590a08cd11a32bebf21e01c0632ed8f6cd8382fc8",
+      "label_sha256": "927c876bf25c93b3379f91afef024629be4f3b1f3f3af8f0c086a7c9c66cc198"
+    },
+    {
+      "split": "train",
+      "image": "images/train/hero_train_011.png",
+      "label": "labels/train/hero_train_011.txt",
+      "image_sha256": "880cc83de3c292eaf88d48e3e2f1738aa461fcb9529f5ad152f87f02a804141e",
+      "label_sha256": "9f884e7679cdad13720f6883aece10b51953b0e59f88f5c07ed6ea18bb8d8dba"
+    },
+    {
+      "split": "train",
+      "image": "images/train/hero_train_012.png",
+      "label": "labels/train/hero_train_012.txt",
+      "image_sha256": "e01a87efedf0142ef7b1ecbb06fa6ebaa6c58956fe28425b64b49ecd858b6ea9",
+      "label_sha256": "c096e52088ca3144e668d95f073bf8588709e78649f01620f72110a8f673926e"
+    },
+    {
+      "split": "train",
+      "image": "images/train/hero_train_013.png",
+      "label": "labels/train/hero_train_013.txt",
+      "image_sha256": "50e28c3e845e30369cd5f6744e3fede41426b6a69ccb2861485de085617561ca",
+      "label_sha256": "77093f6e1204c677019e63658643fc70a853464c4e1f83523b1819db4a6dc610"
+    },
+    {
+      "split": "train",
+      "image": "images/train/hero_train_014.png",
+      "label": "labels/train/hero_train_014.txt",
+      "image_sha256": "ac80b47267d8a561561dced36a3565d881a3c7345467854c01715aa66caf884c",
+      "label_sha256": "654624f95d1fc3273900a46606658103bb1f298cb673992772265e65fe3ee75f"
+    },
+    {
+      "split": "train",
+      "image": "images/train/hero_train_015.png",
+      "label": "labels/train/hero_train_015.txt",
+      "image_sha256": "0fe2bf58605a00ddd7d73e4d67e5657392d526716fc42372093991b519421332",
+      "label_sha256": "0e3efac11642f9fda6e00f547a4254812357c36110692e255aed3248ddb1d46b"
+    },
+    {
+      "split": "train",
+      "image": "images/train/hero_train_016.png",
+      "label": "labels/train/hero_train_016.txt",
+      "image_sha256": "f19af19962502ec0c223629650db26e55532728dfd9c2fba936c7de95e25b1f8",
+      "label_sha256": "0053f817070334b2430d61f5f49af454a10a49cda7025c4d93adf0fa1311e7f8"
+    },
+    {
+      "split": "train",
+      "image": "images/train/hero_train_017.png",
+      "label": "labels/train/hero_train_017.txt",
+      "image_sha256": "fbe6483dea355c6201c0ae5c39dc199d1be6d66fd352c6b61031b4adedbb2c64",
+      "label_sha256": "bfc77f5e71a90d53513dc4cddae9444f370a103ecddaa01351dad79077081801"
+    },
+    {
+      "split": "train",
+      "image": "images/train/hero_train_018.png",
+      "label": "labels/train/hero_train_018.txt",
+      "image_sha256": "11050d9d26004be95e14302a56ede937ae5459a1115ad140372bf08ab6f1d9ed",
+      "label_sha256": "8ba23c36a2e578566917c5ffa5ee60e2414f939ceadd39ba6b93d48a00f2eb9d"
+    },
+    {
+      "split": "train",
+      "image": "images/train/hero_train_019.png",
+      "label": "labels/train/hero_train_019.txt",
+      "image_sha256": "ea90894fed8c46af03daeaa5df5dbacda58439687c62f878a7affb7e674df525",
+      "label_sha256": "6e8c2ae7d10e99ddbefa6a6dbfb6261862cccfe99dc83212e2ad83721974e9d0"
+    },
+    {
+      "split": "train",
+      "image": "images/train/hero_train_020.png",
+      "label": "labels/train/hero_train_020.txt",
+      "image_sha256": "af8a3bd2c39c7bb27856d2164831a94345b6ed34a0ed5a3d979d529dd070b42b",
+      "label_sha256": "eede1c6eff00201be1341ccaf0c202ccb273630d5814d3ed9a8df314e8e4cfa2"
+    },
+    {
+      "split": "train",
+      "image": "images/train/hero_train_021.png",
+      "label": "labels/train/hero_train_021.txt",
+      "image_sha256": "568eb0ea6abbe1f9ec6190a716d181543d1ff80341758e8a8960cd5cc4546e59",
+      "label_sha256": "7795e704097c025ef1759154ac5ca983f3e89d0957e21c3b5def752d4a9ac17c"
+    },
+    {
+      "split": "train",
+      "image": "images/train/hero_train_022.png",
+      "label": "labels/train/hero_train_022.txt",
+      "image_sha256": "88e348bd15fdb5d842f784190966d49fba57833b33915bff7d1bdb74b46c31e2",
+      "label_sha256": "c85c5b20cd8684177a9da84025ef05e955cbcac9d3ce09d16f36d77b1947db7b"
+    },
+    {
+      "split": "train",
+      "image": "images/train/hero_train_023.png",
+      "label": "labels/train/hero_train_023.txt",
+      "image_sha256": "4de153f35f0cb0fb7377d2b7691b4028bc18060b621f7f1683745a42090e1f2a",
+      "label_sha256": "f72ac1ee11d35291fff71a1621cd3e9697dc03c09738e5a0f9ee8470d32f1fe7"
+    },
+    {
+      "split": "train",
+      "image": "images/train/hero_train_024.png",
+      "label": "labels/train/hero_train_024.txt",
+      "image_sha256": "2f1a878f4672f70902974101e5a705484124defd3457d81d5daf82de1319b05e",
+      "label_sha256": "f254db80aded0a2ba27fdf92fc8065d49d36e29d0b3d41c28db92eae8294b1e5"
+    },
+    {
+      "split": "train",
+      "image": "images/train/hero_train_025.png",
+      "label": "labels/train/hero_train_025.txt",
+      "image_sha256": "24ebcfd07798765ad647640b260e86bb07f244483e7f8fe0af0b17453258634c",
+      "label_sha256": "f553307bddab18114fe314a3af7588560addee014093edae4402b4ccfeaf8f28"
+    },
+    {
+      "split": "train",
+      "image": "images/train/hero_train_026.png",
+      "label": "labels/train/hero_train_026.txt",
+      "image_sha256": "b6dcbb37245c1ff7be4ce5412c4659fee00f841b98055e781bd86a293fc4ea9f",
+      "label_sha256": "77093f6e1204c677019e63658643fc70a853464c4e1f83523b1819db4a6dc610"
+    },
+    {
+      "split": "train",
+      "image": "images/train/hero_train_027.png",
+      "label": "labels/train/hero_train_027.txt",
+      "image_sha256": "84069c3113b23a6a9fbe165bac372aceb8326be694782049e2cd553fb95671af",
+      "label_sha256": "2ba22e05d3c5ac1d31d2aa9b3e38451d2b3ccfa45b79af4badce8c7a8b11c48c"
+    },
+    {
+      "split": "train",
+      "image": "images/train/hero_train_028.png",
+      "label": "labels/train/hero_train_028.txt",
+      "image_sha256": "5290127d234e2ebda7f68f3e26f38c6408acf98633f3407fca19475226efe489",
+      "label_sha256": "13a7d9f0b96f63d03292f6068364126490ba367a7be9001253b441ed97281a38"
+    },
+    {
+      "split": "train",
+      "image": "images/train/hero_train_029.png",
+      "label": "labels/train/hero_train_029.txt",
+      "image_sha256": "d8a5709b4fe383674a48c5bde4bde520f2d244e87c75f8a12d089c17c86dc333",
+      "label_sha256": "96ec22afe3df0748540f801ef566425c3ba83d9b5bc479cccb083dc65450f896"
+    },
+    {
+      "split": "train",
+      "image": "images/train/hero_train_030.png",
+      "label": "labels/train/hero_train_030.txt",
+      "image_sha256": "87e735b3c36be384cfb15e5736b9a937f560b0afbe52c44a179638e77f0f9c32",
+      "label_sha256": "b835524eff8869afc88f5c88be97cbaf36b163462b52ee52322cddd5155d98e0"
+    },
+    {
+      "split": "train",
+      "image": "images/train/hero_train_031.png",
+      "label": "labels/train/hero_train_031.txt",
+      "image_sha256": "546beb64ba035f0f1c58d21c59c4205c5b7a259902fac42a16719372310c076c",
+      "label_sha256": "fe67b72013d27de34344b33abba44c7997ebb931e028706d8bfc4a4c5bd771ef"
+    },
+    {
+      "split": "train",
+      "image": "images/train/hero_train_032.png",
+      "label": "labels/train/hero_train_032.txt",
+      "image_sha256": "0e435eaeef5ec12d30e10ae466a01af21a45fd9dc9db0a2f8f3a2b657fd48325",
+      "label_sha256": "64c65178660c9c6587de6e57cc97d926f6aa65fc72f71a0fe1e48323f35599c3"
+    },
+    {
+      "split": "train",
+      "image": "images/train/hero_train_033.png",
+      "label": "labels/train/hero_train_033.txt",
+      "image_sha256": "13b45a0818b506b6e881430efe983bab30a1aaa140a734fe5fa8e885a8f3f02e",
+      "label_sha256": "a4d192d19b283590524b594c04c858c003727a6140039c922d08a1a4d462a753"
+    },
+    {
+      "split": "train",
+      "image": "images/train/hero_train_034.png",
+      "label": "labels/train/hero_train_034.txt",
+      "image_sha256": "431cc0e5f15ec970526adde5d99b0f0c4e743213dd3026738c67254f8555172e",
+      "label_sha256": "18a0dab1e639d5cf9d0d6a2fe18667215898a79a29264dce274031a5edbf3ce5"
+    },
+    {
+      "split": "train",
+      "image": "images/train/hero_train_035.png",
+      "label": "labels/train/hero_train_035.txt",
+      "image_sha256": "cf5bd658d905278f79b56a864838c386a6690ef34a46ece29feef8514b012c91",
+      "label_sha256": "0594f1f4287d0aa4c291c268615b1af50fd82a5b22798ab3cb87542eb3ccae5a"
+    },
+    {
+      "split": "train",
+      "image": "images/train/hero_train_036.png",
+      "label": "labels/train/hero_train_036.txt",
+      "image_sha256": "95cf4e0885ab174a0b8e5f74e3d7a4b5e5869341730e3b20a84b2b5b625bbf00",
+      "label_sha256": "1675e0b747a06075ce290c916a33e82bc8d3713e40cf3c856d43ed276710723f"
+    },
+    {
+      "split": "val",
+      "image": "images/val/hero_val_001.png",
+      "label": "labels/val/hero_val_001.txt",
+      "image_sha256": "4fa2d25eec41034a5e7212c557c7a5bbacad42bfb45469663e5bd453063f75e6",
+      "label_sha256": "3768cb8a85d7da61a40a6700bed2674e7f7948274822c42dc85428189c149f05"
+    },
+    {
+      "split": "val",
+      "image": "images/val/hero_val_002.png",
+      "label": "labels/val/hero_val_002.txt",
+      "image_sha256": "c8d28b6a39d0bdfdd6b638ed10fedf6c30677ee7fb70a42c99eca0f2370bb5c7",
+      "label_sha256": "54f557b9629c0592735674dd9bf5ec5f78b279f1cc26d0b2f2032c16d5b0b865"
+    },
+    {
+      "split": "val",
+      "image": "images/val/hero_val_003.png",
+      "label": "labels/val/hero_val_003.txt",
+      "image_sha256": "0411439321970c841bfbec689ff0b71788d5c7d038bb67acc37859f601453b17",
+      "label_sha256": "11385e2b7f713e5a52244a97fb94bfb09fbd6d656d57a678ce1dd3d19dad1d34"
+    },
+    {
+      "split": "val",
+      "image": "images/val/hero_val_004.png",
+      "label": "labels/val/hero_val_004.txt",
+      "image_sha256": "ce80345d553a4d93a483735db428e7fc0c371da97d2d99b28c10c499b3ca5860",
+      "label_sha256": "95ee42687d66a386463c67fe1cdec807942cc1c3c7b00b7b5e72e88d2dc6fd3c"
+    },
+    {
+      "split": "val",
+      "image": "images/val/hero_val_005.png",
+      "label": "labels/val/hero_val_005.txt",
+      "image_sha256": "6a44ff33b46b175b36544ab07520cde856afaabc9ad3bbd67b94366c82b50a4d",
+      "label_sha256": "7a98c21937632ed06e82595fd78c50c10857594574f9dc98324007cada2838e9"
+    },
+    {
+      "split": "val",
+      "image": "images/val/hero_val_006.png",
+      "label": "labels/val/hero_val_006.txt",
+      "image_sha256": "38ecf040a581cfc3b368eeb6f6b0c17feb52ab21c428ea0d5ed1fea635ab7137",
+      "label_sha256": "2b88056e42693dfe9743493845d06370c4d8f4af44e07f0c5ae45e99da71b6d3"
+    },
+    {
+      "split": "val",
+      "image": "images/val/hero_val_007.png",
+      "label": "labels/val/hero_val_007.txt",
+      "image_sha256": "651f4901564cc037136a5dc7f9d28b2ce85bc056867a279eed060834569b89eb",
+      "label_sha256": "de8904a1ee8f5b2ad6537de6a8620ce822b272498443509e6bde42cf533b4555"
+    },
+    {
+      "split": "val",
+      "image": "images/val/hero_val_008.png",
+      "label": "labels/val/hero_val_008.txt",
+      "image_sha256": "2ea9c4727ffa22e43a73117586a64598f35491ae28a28e54e3b0935764f41090",
+      "label_sha256": "6a79363c563d38db5fdf839884720e60e67d11b75115624a3910986503462c87"
+    },
+    {
+      "split": "val",
+      "image": "images/val/hero_val_009.png",
+      "label": "labels/val/hero_val_009.txt",
+      "image_sha256": "952a4437399ca831f7096e5a6d4f01d7f7ff96a4e047864c040fed636c150502",
+      "label_sha256": "3f938be71f95fb47e50fe9e8158497bef9fd6c94ba2a9c745868af5c4999c38d"
+    },
+    {
+      "split": "val",
+      "image": "images/val/hero_val_010.png",
+      "label": "labels/val/hero_val_010.txt",
+      "image_sha256": "b91b154384b8df3907f4ccff941e2098ca85479c124e05bb28d95ab9ceab4118",
+      "label_sha256": "f6ec55557d7fb9e3c14fdae4455ec3d297b29235a34ac4348d25ed6c660a4dca"
+    },
+    {
+      "split": "val",
+      "image": "images/val/hero_val_011.png",
+      "label": "labels/val/hero_val_011.txt",
+      "image_sha256": "9d66d8a8bb1f8c4c8967ad8b70c946228bf5d0b5743894cb08c342f0d2b3e60d",
+      "label_sha256": "ee60b0f855077050f043e0f7b94ea65013ade9eee1468f48da32f29250a5ed3c"
+    },
+    {
+      "split": "val",
+      "image": "images/val/hero_val_012.png",
+      "label": "labels/val/hero_val_012.txt",
+      "image_sha256": "c695714c842ea796929b2a2a016fa7be58e775b0e5128293aa7e209fd288040f",
+      "label_sha256": "5731760004b66ef8cccbce244429e4091ba021c181d5389b739f04479b851efb"
+    }
+  ]
+}

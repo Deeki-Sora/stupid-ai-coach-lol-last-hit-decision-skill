@@ -29,7 +29,7 @@ python main.py review runs/session/clip_01
 
 ## 3. 事件与表格
 
-动作、目标、相位、生命值、动作开始/结束时间和备注人工或 AI 填写。开始/结束时间为视频秒数，不能把同一动作跨帧持续当成多次攻击。不同单位拥有独立时间序列。
+动作、目标、攻击阶段、生命值、动作开始/结束时间和备注人工或 AI 填写。开始/结束时间为视频秒数，不能把同一动作跨帧持续当成多次攻击。不同单位拥有独立时间序列。
 
 保存并导出，或运行：
 
@@ -55,7 +55,7 @@ python main.py export runs/session/clip_01
 python main.py import-table runs/session/clip_01 edited_events.csv
 ```
 
-默认 UTF-8 BOM，可显式指定 `--encoding gb18030`。字面 `??` 或替换字符提示原文字已损坏，程序拒绝导入；更换编码无法恢复已丢失字符。重复 frame_id/unit_id 行拒绝导入。
+默认 UTF-8 BOM，可显式指定 `--encoding gb18030`。字面 `字面问号` 或替换字符提示原文字已损坏，程序拒绝导入；更换编码无法恢复已丢失字符。重复 frame_id/unit_id 行拒绝导入。
 
 ## 4. AI/工程接口
 

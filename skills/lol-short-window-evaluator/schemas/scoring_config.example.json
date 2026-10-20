@@ -1,0 +1,28 @@
+{
+  "sides": {"blue": "blue", "red": "red"},
+  "actual_cs": {"blue": 14, "red": 8},
+  "theoretical_cs": 14,
+  "actual_xp_share": {"blue": 1.0, "red": 1.0},
+  "pressure_value": {"blue": 0.9, "red": 0.7},
+  "pressure_upper_bound": {"blue": 1.0, "red": 1.0},
+  "state_values": {
+    "blue": {"hp": {"current": 86, "maximum": 951, "recovery": 120}, "resource": {"current": 50, "maximum": 200, "recovery": 120}},
+    "red": {"hp": {"current": 390, "maximum": 950, "recovery": 30}, "resource": {"current": 180, "maximum": 500, "recovery": 20}}
+  },
+  "execution_layers": {
+    "blue": {"distance": 0.92, "phase": 0.90, "resource": 0.88, "movement": 0.92},
+    "red": {"distance": 0.94, "phase": 0.93, "resource": 0.84, "movement": 0.94}
+  },
+  "execution_weights": {"distance": 0.35, "phase": 0.2, "resource": 0.2, "movement": 0.25},
+  "matchup_prior_strength": 1.0,
+  "matchup_prior_component_weight": 0.05,
+  "provenance": {
+    "actual_cs": "manual_confirmed: HUD ledger",
+    "theoretical_cs": "derived: confirmed minion-death timeline",
+    "actual_xp_share": "derived: shared level checkpoint",
+    "pressure_value": "manual_confirmed: event ledger",
+    "pressure_upper_bound": "derived: feasible free-window opportunities",
+    "state_values": "manual_confirmed: endpoint HUD and version data",
+    "execution_layers": "manual_confirmed: reviewed action table"
+  }
+}
