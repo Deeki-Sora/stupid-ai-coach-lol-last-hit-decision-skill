@@ -1,7 +1,7 @@
 'use strict';
 (()=>{
  const L=(zh,en)=>window.uiLang==='en'?en:zh;
- const command=(kind,scope)=>({annotation:scope==='all'?L('标注所有帧','annotate all frames'):L('标注当前帧','annotate current frame'),configuration:scope==='all'?L('填写所有帧配置','fill all frame configurations'):L('填写当前帧配置','fill current frame configuration'),strategy:L('查询工作台攻略','search workbench guides'),matchup:L('查询工作台胜率','fetch workbench matchup rates'),analysis:L('分析当前对局','analyze current match')}[kind]||L('处理工作台请求','process workbench request'));
+ const command=(kind,scope)=>({annotation:scope==='all'?L('标注所有帧','annotate all frames'):L('标注当前帧','annotate current frame'),configuration:scope==='all'?L('填写所有帧配置','fill all frame configurations'):L('填写当前帧配置','fill current frame configuration'),strategy:L('查询工作台攻略','search workbench guides'),matchup:L('查询工作台胜率','fetch workbench matchup rates'),analysis:L('分析当前对局','analyze current match'),mechanics:L('填写观察表','fill observation table')}[kind]||L('处理工作台请求','process workbench request'));
  let revision=null,polling=false,batchBusy=false,lastRequest=null;
  const lockedControls=new Map();
  new MutationObserver(()=>{if(batchBusy)batchState(lastRequest)}).observe($('loadoutPanel'),{childList:true,subtree:true});
@@ -16,10 +16,15 @@
   for(let node of document.querySelectorAll('.cancelSkillRequest'))node.disabled=!['pending','partial','running'].includes(current.status);
  }
  window.addEventListener('beforeunload',event=>{if(batchBusy){event.preventDefault();event.returnValue=''}});
- document.querySelectorAll('.cancelSkillRequest').forEach(node=>node.onclick=async()=>{try{let wasBatch=batchBusy,current=await api('/api/assistant-cancel',{});revision=current.revision;batchState(current);if(wasBatch){dirty=false;await reload()}let text=L('已取消 Skill 请求，已保存的草稿保留。','Skill request cancelled; saved drafts are retained.');message(text);if(current.kind==='analysis')$('analysisStatus').textContent=text}catch(e){message(e.message)}});
+ document.querySelectorAll('.cancelSkillRequest').forEach(node=>node.onclick=async()=>{try{let wasBatch=batchBusy,current=await api('/api/assistant-cancel',{});revision=current.revision;batchState(current);if(wasBatch){dirty=false;await reload()}let text=L('已取消 Skill 请求，已保存的草稿保留。','Skill request cancelled; saved drafts are retained.');message(text);if(current.kind==='mechanics')$('mechanicsStatus').textContent=text;if(current.kind==='analysis')$('analysisStatus').textContent=text}catch(e){message(e.message)}});
 
  function renderReport(markdown){let container=$('analysisReport');container.replaceChildren();let table=null;for(let line of markdown.split('\n')){if(/^\|[- :|]+\|$/.test(line))continue;if(line.startsWith('|')){if(!table){table=document.createElement('table');container.append(table)}let row=document.createElement('tr');for(let cell of line.split('|').slice(1,-1)){let element=document.createElement(table.children.length?'td':'th');element.textContent=cell.trim();row.append(element)}table.append(row);continue}table=null;if(!line.trim())continue;let heading=line.match(/^(#{1,3})\s+(.*)/),node=document.createElement(heading?'h3':'p');node.textContent=heading?heading[2]:line;container.append(node)}}
  async function refreshAnalysis(){let language=window.uiLang==='en'?'en':'zh',data=await api('/api/analysis-report?language='+language);if(data.markdown){renderReport(data.markdown);$('analysisDownload').hidden=false;$('analysisDownload').href=url('/assessment/analysis_report_'+language+'.md');$('analysisDownload').textContent=L('下载分析报告（MD）','Download report (MD)')}else $('analysisReport').replaceChildren()}
+ async function refreshPlanning(){
+  let data=await api('/api/planning-state');
+  if(data.task){$('gameTask').value=JSON.stringify(data.task,null,2);$('gameStatus').textContent=L('已载入推演任务：视频 ','Planning task loaded: video ')+Number(data.task.entry_time_s).toFixed(3)+' s';}
+  if(data.result){let pre=document.createElement('pre');pre.style.whiteSpace='pre-wrap';pre.textContent=JSON.stringify(data.result,null,2);$('gameResults').replaceChildren(pre);$('gameStatus').textContent=L('已载入保存的计划或推演结果，请核对结果中的时间。','Saved plan or simulation loaded; check its recorded time.');}
+ }
  $('runAnalysis').onclick=async()=>{
   let button=$('runAnalysis'),requestedFrameId=frame().id;button.disabled=true;
   try{
@@ -51,12 +56,12 @@
  $('askAllSkill').onclick=()=>request('annotation','all').catch(e=>message(e.message));
  $('askConfigFrameSkill').onclick=()=>request('configuration').catch(e=>message(e.message));
  $('askConfigAllSkill').onclick=()=>request('configuration','all').catch(e=>message(e.message));
- $('askMechanicsAssistant').onclick=()=>request('mechanics').then(()=>{$('mechanicsStatus').textContent=$('assistantStatus').textContent}).catch(e=>{$('mechanicsStatus').textContent=e.message});
+ $('askMechanicsAssistant').onclick=()=>request('mechanics','all').then(()=>{$('mechanicsStatus').textContent=$('assistantStatus').textContent}).catch(e=>{$('mechanicsStatus').textContent=e.message});
  $('reloadAssistant').onclick=()=>reload().catch(e=>message(e.message));
  $('reloadMechanics').onclick=()=>mechanics().catch(e=>{$('mechanicsStatus').textContent=e.message});
  $('confirmAssistant').onclick=async()=>{try{apply();let count=0;for(let [uid,value] of Object.entries(ann().units||{}))if(value.ai_evidence){value.reviewed=true;let unit=p.units.find(u=>u.id===uid);if(unit?.roster_reviewed===false)unit.roster_reviewed=true;count++}if(ann().game_time_s!=null)ann().game_time_reviewed=true;await save();message(L('已确认当前帧的 AI 识别结果：','AI results confirmed for this frame: ')+count)}catch(e){message(e.message)}};
  for(let input of $('action').querySelectorAll('input,select'))input.addEventListener('input',()=>{dirty=true});
- window.workbenchReady.then(async()=>{try{await mechanics();await refreshAnalysis();let current=await api('/api/assistant-status',{});revision=current.revision;batchState(current)}catch(e){$('mechanicsStatus').textContent=e.message}});
+ window.workbenchReady.then(async()=>{try{await mechanics();await refreshAnalysis();await refreshPlanning();let current=await api('/api/assistant-status',{});revision=current.revision;batchState(current)}catch(e){$('mechanicsStatus').textContent=e.message}});
  window.addEventListener('languagechange',()=>{refreshAnalysis().catch(e=>{$('analysisStatus').textContent=e.message});window.refreshStrategyReference?.().catch(e=>message(e.message))});
  setInterval(async()=>{
   if(polling||!p)return;polling=true;

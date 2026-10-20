@@ -114,6 +114,28 @@ and do not claim cancellation is complete.
 - Chinese: `没有找到可处理的当前请求，或请求版本已经变化。请在工作台重新发起请求。`
 - English: `There is no current request to process, or its revision has changed. Create a new request in the workbench.`
 
+## Observation tables and planning
+
+For `填写观察表` / `fill observation table`, read/claim a mechanics request.
+Match the full button wording **请 Skill 协助填写观察表** / **Ask Skill to
+fill observations** too. Complete through `assistant-finish` after inspection.
+
+- Chinese: `观察表已保存并重新统计，共 {opportunity_count} 次独立机会。未知结果已留空；需要复核：{review_summary}。请刷新工作台查看。`
+- English: `The observation table was saved and recalculated: {opportunity_count} distinct opportunities. Unknown outcomes remain blank. Review: {review_summary}. Refresh the workbench to see the results.`
+
+Use `mechanics_coverage.unique_opportunities` from the saved result. Zero
+identifiable opportunities is valid. Mention preserved conflicts when reported.
+
+For direct planning commands, report only saved results:
+
+- Chinese: `已从第 {frame_number} 帧（视频 {source_time_s} 秒）保存{action_name}。请刷新“评分与推演”查看；未知项仍需核对。`
+- English: `{action_name} was saved from frame {frame_number}, video time {source_time_s}s. Refresh Planning to view it; unknown inputs still need checking.`
+
+Use the actual project frame number and returned frame ID. Omit the frame
+clause for refresh/apply-statistics actions without a new frame selection.
+If the task is disabled or required rules are missing, report the actual
+reason rather than claiming that a simulation ran.
+
 ## Automatic annotation
 
 ### YOLO available

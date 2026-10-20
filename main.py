@@ -128,6 +128,10 @@ def main(argv=None):
     ac.add_argument('--workspace')
     af=sub.add_parser('assistant-finish',help='Validate and save the Skill response for workbench refresh')
     af.add_argument('--workspace',required=True);af.add_argument('--input',required=True)
+    pc=sub.add_parser('planning-command',help='Run and save an analysis-page action for browser refresh')
+    pc.add_argument('action',choices=['refresh','plan','draft','apply-observations','run']);pc.add_argument('--workspace')
+    pc.add_argument('--frame');pc.add_argument('--frame-number',type=int);pc.add_argument('--side',choices=['blue','red'])
+    pc.add_argument('--horizon',type=float,default=3.0);pc.add_argument('--task')
     ar=sub.add_parser('analyze',help='Run the evaluator and write a readable timeline report')
     ar.add_argument('--workspace',required=True);ar.add_argument('--language',choices=['zh','en'],default='zh')
     args=p.parse_args(argv)
@@ -262,6 +266,10 @@ def main(argv=None):
         elif args.command=='analyze':
             from workbench.analysis_task import run_analysis
             print(json.dumps(run_analysis(args.workspace,args.language),ensure_ascii=False))
+        elif args.command=='planning-command':
+            from workbench.planning_commands import perform
+            print(json.dumps(perform(args.workspace,args.action,frame_id=args.frame,frame_number=args.frame_number,
+                side=args.side,horizon=args.horizon,task_file=args.task),ensure_ascii=False,indent=2))
         elif args.command in {'assistant-read','assistant-status','assistant-cancel','assistant-finish'}:
             from workbench import request_commands
             if args.command=='assistant-read':result=request_commands.read_request(args.workspace,kind=args.kind,scope=args.scope,start=args.start)

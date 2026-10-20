@@ -106,13 +106,16 @@ def finish_request(workspace, payload):
         raise ValueError('Provide strategy_result or explain unknown_items')
     if request['kind'] == 'analysis' and not payload.get('analysis_report'):
         raise ValueError('Provide the evidence-based analysis_report Markdown')
+    if request['kind'] == 'mechanics' and 'mechanics_observations' not in payload and not payload.get('unknown_items'):
+        raise ValueError('Provide mechanics_observations or explain unknown_items')
     result = import_drafts(directory, dict(payload, proposals=payload.get('proposals', [])))
     return {'workspace': str(directory), 'status': result['status'],
             'filled_fields': result.get('filled_fields', 0),
             'inspected_frames': result.get('inspected_frames', []),
             'remaining_frames': result.get('remaining_frames', []),
             'unknown_items': result.get('unknown_items', []),
-            'review_items': result.get('review_items', []), 'refresh_workbench': result['status'] == 'filled'}
+            'review_items': result.get('review_items', []),
+            'mechanics_coverage': result.get('mechanics_coverage'), 'refresh_workbench': result['status'] == 'filled'}
 
 
 def cancel_request(workspace=None):

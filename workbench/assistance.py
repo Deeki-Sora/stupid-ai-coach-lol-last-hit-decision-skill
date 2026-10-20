@@ -35,7 +35,7 @@ def request_assistance(directory, frame_id, kind='annotation', scope='current', 
     previous=status(directory)
     if batch_active(previous):
         raise ValueError('An all-frame task is active; finish or cancel it before starting another request')
-    ensure_mechanics(directory)
+    mechanics=ensure_mechanics(directory)
     requested=[];image_hashes={}
     for selected in (project['frames'] if scope=='all' else [frame]):
         image=(directory/selected['image']).resolve()
@@ -59,6 +59,10 @@ def request_assistance(directory, frame_id, kind='annotation', scope='current', 
     if kind=='configuration':
         value['configuration']=project.get('configuration',{})
         value['instructions']='Inspect each requested original frame using its captured frame ID and video time. Return state_snapshots with frame_id, evidence_image, confidence, provider and sides; each side may contain level, spell_ranks, items, inventory_known, event_state and stat_overrides using the loadout state schema. Keep unobservable values unknown. Never change global champions, runes or summoner identities. Static attributes are calculated from the patch catalog, level, items and shards, not estimated from pixels. Include inspected_frames even if nothing can be identified. Include the exact request_revision and complete through assistant-finish. During all-frame tasks do not ask the player to refresh until every requested frame is inspected. Reply in the requested language with completion, unknowns and review items, then ask the player to refresh.'
+    if kind=='mechanics':
+        from .mechanic_observations import FIELDS
+        value['mechanics']={**mechanics,'fields':FIELDS}
+        value['instructions']='Inspect the requested frames and existing mechanics/observations.csv. Return mechanics_observations rows using the declared fields, plus inspected_frames, unknown_items and review_items. Count each distinct cast or proc opportunity once; preserve registered actor/target IDs, video seconds, context and evidence source. Unknown eligibility or outcomes remain blank; never treat them as misses. Include the exact request_revision and complete through assistant-finish. It preserves existing observations, updates the CSV and estimates, exports event/distance/action/death tables and notifies the workbench. An empty observations list is valid when no opportunity can be identified; explain unknowns in the requested language.'
     if kind=='analysis':
         value['assessment_bundle']='assessment_bundle.zip'
         value['instructions']='Read the generated assessment_bundle.zip and its project, annotations, event/distance/action/death tables, timed configuration, strategy references and assessment framework. The Skill performs the analysis; the browser only prepares evidence. Verify observations, search matchup guidance when needed, build scoring inputs from evidence and run the declared reproducible algorithms. Do not invent scores or tune weights toward a desired ranking. Return analysis_report Markdown in the requested language, including both players component and overall scores or explicit unknowns/intervals, event-by-event evidence, costs/receipts and practical advice. Always return a report even when evidence is insufficient; unsupported fields remain unknown. Preserve global fixed selections. Include the exact request_revision and complete through assistant-finish to save the report and synchronize the tables; reply in the conversation.'
@@ -258,12 +262,36 @@ def import_drafts(directory, payload):
     report=payload.get('analysis_report')
     if report is not None and (request.get('kind')!='analysis' or not isinstance(report,str) or not report.strip()):
         raise ValueError('Analysis report must be nonempty Markdown for an analysis request')
+    mechanics=None
+    if 'mechanics_observations' in payload:
+        from .mechanic_observations import merge_observations
+        if request.get('kind')!='mechanics':raise ValueError('Unexpected mechanics observations')
+        rows=payload['mechanics_observations']
+        if not isinstance(rows,list):raise ValueError('mechanics_observations must be a list')
+        requested=[f for f in request.get('frames',[]) if f['id'] in available]
+        for row in rows:
+            if not isinstance(row,dict):raise ValueError('Observation rows must be objects')
+            if row.get('actor') not in units or row.get('target') and row['target'] not in units:
+                raise ValueError('Observation actor and target must use workspace unit IDs')
+            if any(uid.strip() not in units for uid in str(row.get('hit_unit_ids','')).split(';') if uid.strip()):
+                raise ValueError('Observation hit units must use workspace IDs')
+            event_time=float(row.get('source_time_s','nan'))
+            source=str(row.get('source',''))
+            if not requested or not min(f['source_time_s'] for f in requested)<=event_time<=max(f['source_time_s'] for f in requested):
+                raise ValueError('Observation time must stay within the requested evidence')
+            if not any(f['image'] in source for f in requested):
+                raise ValueError('Observation source must name a requested original screenshot')
+        mechanics=merge_observations((directory/'mechanics/observations.csv').read_text(encoding='utf-8-sig'),payload['mechanics_observations'])
+        count+=mechanics[2]
     inspected=set(request.get('inspected_frames',[]))|{p['frame_id'] for p in proposals}|{f['frame_id'] for f in payload.get('frame_observations',[])}|state_frames|set(payload.get('inspected_frames',[]))
     if not inspected.issubset(frames):raise ValueError('Unknown inspected frame')
     remaining=[f['id'] for f in request.get('frames',[]) if f['id'] not in inspected] if request.get('kind') in ('annotation','configuration') else []
     validate_annotations(project,annotations)
     count+=int(prior is not None)+int(strategy is not None)+int(report is not None)
     revision=time.time_ns()
+    latest=status(directory)
+    if latest.get('status')=='cancelled' or latest.get('request_revision',latest.get('revision'))!=request['request_revision']:
+        raise ValueError('Assistance request was cancelled or replaced before saving')
     (directory/'assistant/backups').mkdir(parents=True,exist_ok=True)
     write_json(directory/f'assistant/backups/annotations_{revision}.json',original)
     write_json(directory/f'assistant/backups/project_{revision}.json',original_project)
@@ -275,6 +303,11 @@ def import_drafts(directory, payload):
     if report is not None:
         output=directory/'assessment';output.mkdir(exist_ok=True)
         (output/f'analysis_report_{request["language"]}.md').write_text(report,encoding='utf-8')
+    if mechanics is not None:
+        observations=directory/'mechanics/observations.csv'
+        (directory/f'assistant/backups/observations_{revision}.csv').write_bytes(observations.read_bytes())
+        observations.write_text(mechanics[0],encoding='utf-8-sig')
+        write_json(directory/'mechanics/estimated_models.json',mechanics[1])
     export_tables(directory)
     def accumulated(key):
         result=list(request.get(key,[]))
@@ -284,5 +317,8 @@ def import_drafts(directory, payload):
     request.update(status='partial' if remaining else 'filled',revision=revision,filled_fields=request.get('filled_fields',0)+count,skipped=skipped,
                    inspected_frames=sorted(inspected),remaining_frames=remaining,
                    unknown_items=accumulated('unknown_items'),review_items=accumulated('review_items'))
+    if mechanics is not None:
+        request['mechanics_coverage']=mechanics[1]['coverage']
+        request['review_items'] += [{'observation_conflict':item,'retained':'existing value'} for item in mechanics[3]]
     write_json(directory/'assistant/request.json',request)
     return request

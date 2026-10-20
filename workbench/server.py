@@ -111,6 +111,9 @@ def make_server(directory=None, port=0):
                 report=directory/'assessment'/f'analysis_report_{language}.md'
                 return self.respond({'markdown':report.read_text(encoding='utf-8') if report.exists() else '',
                                      'revision':report.stat().st_mtime_ns if report.exists() else None})
+            if path == '/api/planning-state':
+                from .planning_commands import saved_state
+                return self.respond(saved_state(directory))
             if path == '/api/strategy-result':
                 query=urllib.parse.parse_qs(urllib.parse.urlsplit(self.path).query)
                 language='en' if query.get('language')==['en'] else 'zh'
@@ -295,19 +298,18 @@ def make_server(directory=None, port=0):
                     elif path == '/api/export':
                         self.respond(export_assessment(directory))
                     elif path == '/api/game-draft':
-                        from .game_tools import draft
-                        self.respond(draft(read_json(directory/'project.json'),read_json(directory/'annotations.json'),body['frame_id'],directory))
+                        from .planning_commands import perform
+                        self.respond(perform(directory,'draft',frame_id=body['frame_id'])['task'])
                     elif path == '/api/game-run':
-                        from .game_tools import save_run
-                        self.respond(save_run(directory,body['task']))
+                        from .planning_commands import perform
+                        saved=perform(directory,'run',task=body['task'])
+                        self.respond({key:value for key,value in saved.items() if key not in ('workspace','action')})
                     elif path == '/api/plan-window':
-                        from .window_planner import plan_window, markdown
-                        result = plan_window(directory, side=body['side'], frame_id=body.get('frame_id'),
-                            source_time_s=body.get('source_time_s'), horizon_s=body.get('horizon_s', 3.0),
-                            game_time_s=body.get('game_time_s'))
-                        (directory/'assessment').mkdir(exist_ok=True)
-                        (directory/'assessment'/'window_plan.md').write_text(markdown(result), encoding='utf-8')
-                        self.respond(result)
+                        from .planning_commands import perform
+                        self.respond(perform(directory,'plan',frame_id=body.get('frame_id'),source_time_s=body.get('source_time_s'),side=body['side'],horizon=body.get('horizon_s',3.0))['result'])
+                    elif path == '/api/apply-observations':
+                        from .planning_commands import perform
+                        self.respond(perform(directory,'apply-observations',task=body['task']))
                     elif path == '/api/estimate-probabilities':
                         from .mechanic_observations import estimate
                         result=estimate(body['csv'])

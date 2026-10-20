@@ -1,6 +1,6 @@
 ---
 name: lol-short-window-evaluator
-description: Run the local League of Legends review workbench and process its requests from chat. Handle 运行/run and service controls, 标注当前帧/annotate current frame, 标注所有帧/annotate all frames, configuration filling, matchup and guide searches, and 分析当前对局/analyze current match. Read original evidence and write reviewed or explicitly unreviewed results back to the external workspace.
+description: Run the local League of Legends review workbench and process its requests from chat. Handle service controls, frame annotation, configuration filling, matchup and guide searches, observation tables, match analysis and short-window planning. Read original evidence and save reviewable results to the external workspace.
 ---
 
 # 愚蠢的AI教练——一个用来分析LOL真实对局中的补兵决策的SKILL
@@ -77,12 +77,15 @@ completion. Do not ask the player to copy files, author JSON or run commands.
 | `填写所有帧配置` | `fill all frame configurations` | `assistant-read --start --kind configuration --scope all` |
 | `查询工作台胜率`、`处理工作台胜率查询请求` | `fetch workbench matchup rates` | `assistant-read --start --kind matchup` |
 | `查询工作台攻略`、`处理工作台攻略请求` | `search workbench guides` | `assistant-read --start --kind strategy` |
+| `填写观察表`、`请 Skill 协助填写观察表`、`处理工作台观察表请求` | `fill observation table`, `ask Skill to fill observations`, `ask Skill to help fill observations`, `process workbench observation request` | `assistant-read --start --kind mechanics` |
 | `分析当前对局`、`运行分析任务`、`处理工作台分析请求` | `analyze current match` | `assistant-read --start --kind analysis` |
 | `取消工作台请求` | `cancel workbench request` | `assistant-cancel` |
 | `工作台请求状态` | `workbench request status` | `assistant-status` |
 
 `处理工作台识别请求` also reads the current annotation request, without
 changing its current/all scope. Keep bare `运行` / `run` as service-start.
+Treat Skill/skill/SKILL and optional spaces in the observation-table phrases
+equivalently. `请skill协助填写观察表` is an executable command too.
 
 The installed `runner.py` accepts all these command arguments. `assistant-read`
 locates the active browser workspace, or the single pending workspace recorded
@@ -106,6 +109,9 @@ Annotation/configuration results use `proposals`, `frame_observations`,
 For a guide, place the cited guide object under `strategy_result`. For a
 matchup rate, use `matchup_prior`. For analysis, audit/evaluate the evidence
 and place the complete readable Markdown report under `analysis_report`.
+Observation-table requests return `mechanics_observations` as row objects
+using the request's `mechanics.fields`; use an empty list when nothing can
+be identified and explain the missing evidence in `unknown_items`.
 Unknown search results use `unknown_items` and preserve existing data.
 Every response includes the exact returned `request_revision`; retain it
 across batches. Never round it or replace it with the latest status revision.
@@ -134,6 +140,37 @@ score before returning the report. If a direct workspace-file correction is
 needed, run `export <workspace>` before final completion so all dependent tables
 and the assessment bundle agree with the saved records. Never edit only a
 displayed HTML value or only one derived CSV.
+
+### Other analysis-page commands
+
+These direct chat commands do not require a pending AI request. Locate the
+active workspace with `assistant-status` or an explicit user path. They use
+the same calculations as the page buttons and save state that the workbench
+reloads on refresh.
+
+| Chinese command / button wording | English command | Arguments after `python main.py` |
+|---|---|---|
+| `刷新观察表`、`刷新工作区观察表`、`重新统计观察表` | `refresh observation table`, `recalculate observations` | `planning-command refresh --workspace <workspace>` |
+| `生成下一短时窗口计划`、`生成短时计划` | `plan next short window` | `planning-command plan --workspace <workspace> --frame-number <N> --side <blue-or-red>` |
+| `以当前帧生成任务`、`生成推演任务` | `draft task at current frame`, `draft planning task` | `planning-command draft --workspace <workspace> --frame-number <N>` |
+| `将统计模型写入任务`、`将观察统计写入任务` | `apply observation statistics to task` | `planning-command apply-observations --workspace <workspace>` |
+| `运行已核验任务`、`运行已核验推演` | `run verified task`, `run verified simulation` | `planning-command run --workspace <workspace>` |
+
+For plan/draft, obtain N from the player's stated one-based frame number or
+an exact request snapshot supplied for this operation, and obtain the side
+before planning. For example, `从第 10 帧为蓝方生成短时计划` selects frame 10
+and blue. Bare "current frame" without a captured frame or explicit number
+requires clarification; never substitute the first frame, an old analysis
+request or a guessed browser slider position. Do not claim a different request
+merely to discover the workspace.
+
+Drafts save to `game_analysis/draft_task.json` and remain unverified and
+disabled. Applying observations preserves `context_verified=false` and does
+not enable or verify the task. Running requires a task actually checked
+against evidence and explicitly enabled. Unknown inputs do not justify
+changing verification flags. Explain disabled/missing-input results; after a
+saved result, reply with its source frame/time and tell the player to refresh.
+Do not execute these actions merely because the user asks which commands exist.
 
 ## Response templates
 
@@ -354,16 +391,22 @@ automatically loads the drafts when there are no unsaved edits. Ask the player
 to inspect and confirm each affected frame using the workbench review button.
 Unaccepted drafts remain uncertain and must not be scored as verified facts.
 
-For a mechanics request, use the automatically generated
-`mechanics/observations.csv` and `mechanics/adapters.json`. Help the player fill
-distinct cast/proc opportunities from evidence; keep unknown outcomes blank.
-Use `python main.py estimate-probabilities --help` to inspect the current command
-interface, or reload the workspace observations in the browser to recompute
-the estimates. After filling a mechanics-only request, export the updated tables,
-then save an empty `proposals` list with the exact `request_revision` returned by
-`assistant-read` and finish it through `assistant-finish`. Include any unknown
-outcomes in `unknown_items`. Empty observation tables are valid and
-do not establish trigger probabilities.
+For a mechanics request, read the existing `mechanics/observations.csv`,
+`mechanics/adapters.json` and requested frames. Return `mechanics_observations`
+row objects using the declared fields: distinct opportunity/mechanism IDs,
+actor/target unit IDs, source-video seconds, a positive observation window,
+eligibility, outcome, context and source frame/image. Count one cast/proc
+opportunity once across screenshots. Unknown eligibility or outcomes are blank,
+not misses. Include `inspected_frames`, unknowns and review items.
+Use workspace unit IDs and requested image paths; observation times are video
+seconds within the requested frames, not values from the in-game clock.
+
+Finish through `assistant-finish` with the exact `request_revision`. It merges
+missing cells and new opportunities while preserving existing facts, keeps a
+CSV backup, recomputes `mechanics/estimated_models.json` and exports dependent
+tables. Conflicting values are retained for review. Do not write the CSV first
+and only afterward check whether the request was cancelled. An empty row list
+is valid when nothing can be identified; it establishes no trigger probability.
 Do not ask non-programmers to author JSON or install a vision package merely to
 fill a few observations; use the agent's available visual tools first.
 

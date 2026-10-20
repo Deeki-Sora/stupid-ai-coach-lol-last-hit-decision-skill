@@ -42,11 +42,15 @@ placeholders must be filled from actual command or request output.
 After pressing a workbench request button, send `处理工作台请求` / `process
 workbench request` in the AI conversation. Specific commands include
 `标注当前帧`, `标注所有帧`, `填写当前帧配置`, `填写所有帧配置`,
-`查询工作台胜率`, `查询工作台攻略` and `分析当前对局`; see the bilingual
+`查询工作台胜率`, `查询工作台攻略`, `填写观察表` and `分析当前对局`; see the bilingual
 command table in `SKILL.md`. The Skill discovers the current request, uses
 the agent's vision or web tools, and saves results through `assistant-finish`.
 The player refreshes the workbench to review them. The AI tool needs access
 to the local workspace; a webpage request button alone does not start a chat.
+The Skill also supports refreshing observations, planning the next window,
+drafting a task, applying observation statistics and running a verified task.
+These actions save results for browser refresh; give the frame number and side
+when relevant. See the analysis-page command table in `SKILL.md`.
 Start the guided local UI with `python main.py start`; it opens the browser
 workbench and the Skill should explain each next field in the chat. After the
 two champions and patch are fixed, `search-strategy` stores optional web

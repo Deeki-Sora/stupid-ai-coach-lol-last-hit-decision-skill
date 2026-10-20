@@ -13,6 +13,40 @@ def template():
     return stream.getvalue()
 
 
+def merge_observations(text, incoming):
+    """Fill unknown cells and append distinct opportunities without replacing manual facts."""
+    if not isinstance(incoming,list):raise ValueError('mechanics_observations must be a list')
+    rows=list(csv.DictReader(io.StringIO(text.lstrip('\ufeff'))))
+    index={(r['mechanism_id'],r['opportunity_id']):r for r in rows}
+    changed=0;conflicts=[]
+    for candidate in incoming:
+        if not isinstance(candidate,dict) or not set(candidate).issubset(FIELDS):
+            raise ValueError('Unknown observation field')
+        row={}
+        for field in FIELDS:
+            value=candidate.get(field,'')
+            if value is None:value=''
+            elif isinstance(value,bool):value=str(value).lower()
+            elif not isinstance(value,(str,int,float)):raise ValueError('Observation cells must be text or numbers')
+            row[field]=str(value)
+        if not row['mechanism_id'] or not row['opportunity_id']:
+            raise ValueError('Observation mechanism_id and opportunity_id are required')
+        key=(row['mechanism_id'],row['opportunity_id'])
+        if key not in index:
+            rows.append(row);index[key]=row;changed+=1;continue
+        existing=index[key];filled=False
+        for field,value in row.items():
+            if not existing.get(field) and value:
+                existing[field]=value;filled=True
+            elif value and existing.get(field)!=value:
+                conflicts.append(dict(mechanism_id=key[0],opportunity_id=key[1],field=field))
+        changed+=int(filled)
+    stream=io.StringIO(newline='');writer=csv.DictWriter(stream,fieldnames=FIELDS)
+    writer.writeheader();writer.writerows(rows)
+    merged=stream.getvalue()
+    return merged,estimate(merged),changed,conflicts
+
+
 def boolean(value):
     value=value.strip().lower()
     if value in ('1','true'):return True

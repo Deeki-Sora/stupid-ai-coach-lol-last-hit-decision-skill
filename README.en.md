@@ -101,10 +101,18 @@ With the `lol-short-window-evaluator` Skill loaded, these short commands control
 | `查询工作台胜率` | `fetch workbench matchup rates` | Find and save the requested matchup win rates |
 | `查询工作台攻略` | `search workbench guides` | Find and save guides with sources |
 | `分析当前对局` | `analyze current match` | Read the assessment material and save the analysis report |
+| `填写观察表`, `请 Skill 协助填写观察表` | `fill observation table` | Inspect casts and trigger opportunities, fill observations and recalculate statistics |
+| `刷新工作区观察表`, `重新统计观察表` | `refresh observation table`, `recalculate observations` | Reload saved observations and recalculate statistics |
+| `生成下一短时窗口计划` | `plan next short window` | Plan the next last-hit window from a specified screenshot and side |
+| `以当前帧生成任务`, `生成推演任务` | `draft task at current frame`, `draft planning task` | Prepare a simulation draft from a specified screenshot |
+| `将统计模型写入任务` | `apply observation statistics to task` | Add observations to the saved draft; their applicability still needs checking |
+| `运行已核验任务` | `run verified task` | Run a checked and explicitly enabled simulation task |
 | `取消工作台请求` | `cancel workbench request` | Cancel the current request and stop further imports |
 | `工作台请求状态` | `workbench request status` | Show whether the current request is being processed or completed |
 
 For filling, searches and analysis, first press the corresponding webpage button, then enter a command above in the AI conversation with the Skill loaded. You can also use `process workbench request` for any current request. The AI tool needs read/write access to the local workspace. It saves the results and reports completed fields, unknowns and review items; refresh the workbench to see them without importing files manually.
+
+Refreshing observations, making short-window plans and working with simulation drafts can also be requested directly in chat. Specify the frame number when a screenshot is needed, for example, "Plan the next short window for blue from frame 10." If the AI cannot identify the current frame, it will check first rather than substituting the first screenshot or an old request. Refresh the page to see saved plans, drafts and simulation results.
 
 Optional colored-region candidates (the full health-bar center still needs confirmation):
 
@@ -217,7 +225,7 @@ On Evidence, click **Save and export assessment bundle**, wait for the download 
 
 The preceding steps cover ordinary replay review. To compare choices such as attacking a minion now or waiting, open **Advanced: short-window events and game analysis** and enable the option inside. First choose the starting screenshot and the player's side, then use **Plan next short window** or **Draft task at current frame**. Check damage, distance, cooldowns and both sides' actions. Click **Run verified task** only after confirming that the necessary information is available.
 
-To record skill hits, passive activations or rune triggers, open the corresponding observation table. Record each cast or trigger once, and leave uncertain outcomes blank. The detailed short-window guide below explains these options further.
+To record skill hits, passive activations or rune triggers, open the observation section, click **Ask Skill to fill observations**, then enter `fill observation table` or the button's full wording in your AI conversation. The Skill checks the sampled screenshots, saves supported observations and recalculates statistics. Count each cast or trigger once, and leave unclear outcomes blank. Refresh after completion; use **Cancel Skill request** beside the button to stop. The detailed short-window guide below explains these options further.
 
 To look up a button, reopen saved records or edit tables, see the **[workbench guide](docs/workbench_guide.md)**. To hand your records to another AI tool, see **[workflow and data formats](docs/workflow.md)**. To compare different attack choices in more detail, see **[short-window analysis](docs/short_horizon.md)**.
 
